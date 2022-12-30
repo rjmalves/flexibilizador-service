@@ -44,7 +44,7 @@ class DECOMPFlexibilizationRepository(AbstractFlexibilizationRepository):
         try:
             with uow:
                 dadger = await uow.files.get_dadger()
-                inviab = uow.files.get_inviabunic().inviabilidades_iteracoes
+                inviab = uow.files.get_inviabunic().inviabilidades_simulacao_final
                 relato = uow.files.get_relato()
                 hidr = uow.files.get_hidr()
                 # Cria as inviabilidades
