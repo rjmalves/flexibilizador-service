@@ -246,7 +246,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             novas_taxas[idx] = novo_valor
             dadger.ti(codigo=max_viol._codigo).taxas = novas_taxas
             Log.log().info(
-                + f"{valor_atual} -> {novo_valor}"
+                f"{valor_atual} -> {novo_valor}"
             )
             res.append(
                 FlexibilizationResult(
@@ -406,7 +406,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     codigo=max_viol._codigo, estagio=max_viol._estagio
                 ).limites_superiores = novos
             Log.log().info(
-                + f" - {max_viol._limite}: "
+                f" - {max_viol._limite}: "
                 + f"{valor_atual} -> {novo_valor}"
             )
             res.append(
