@@ -195,7 +195,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     flexPatamar=None,
                     flexLimit=None,
                     flexSubsystem=None,
-                    flexAmount=max_viol,
+                    flexAmount=None,
                 )
             )
         return res
