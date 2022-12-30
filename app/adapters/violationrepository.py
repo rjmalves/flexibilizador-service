@@ -542,7 +542,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     reg_ac_novo = ACVERTJU()
                     reg_ac_novo.uhe = max_viol._codigo
                     reg_ac_novo.influi = 0
-                    dadger.cria_registro(reg_ac_novo, dadger.ac(169, ACNPOSNW))
+                    dadger.cria_registro(dadger.ac(169, ACNPOSNW), reg_ac_novo)
                 else:
                     Log.log().info(
                         "Flexibilizando FP - "
