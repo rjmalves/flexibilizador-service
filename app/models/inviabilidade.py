@@ -383,7 +383,7 @@ class InviabilidadeDEFMIN(Inviabilidade):
         vazmin_hidr = int(
             list(
                 hidr.cadastro.loc[
-                    hidr.cadastro["Nome"] == nome, "Vazão Mínima"
+                    hidr.cadastro["Nome"] == nome, "Vazão Mínima Histórica"
                 ]
             )[0]
         )
