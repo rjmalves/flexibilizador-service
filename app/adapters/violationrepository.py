@@ -525,7 +525,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     codigo=max_viol._codigo, estagio=max_viol._estagio
                 ).limites_superiores = novos
             Log.log().info(
-                + f" - {max_viol._limite}: "
+                f" {max_viol._limite}: "
                 + f"{valor_atual} -> {novo_valor}"
             )
             res.append(
