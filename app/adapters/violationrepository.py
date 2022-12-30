@@ -283,8 +283,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
         def __assegura_existencia_registros(inv: InviabilidadeHV):
             # "Cria" todas as LVs até o último estágio da restrição HV
+            ei = dadger.hv(codigo=inv._codigo).estagio_inicial
             ef = dadger.hv(codigo=inv._codigo).estagio_final
-            for e in range(max_viol._estagio, ef + 1):
+            for e in range(ei, ef + 1):
                 dadger.lv(codigo=max_viol._codigo, estagio=e)
 
         res: List[FlexibilizationResult] = []
@@ -374,8 +375,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
         def __assegura_existencia_registros(inv: InviabilidadeHQ):
             # "Cria" todas as LQs até o último estágio da restrição HQ
+            ei = dadger.hq(codigo=inv._codigo).estagio_inicial
             ef = dadger.hq(codigo=inv._codigo).estagio_final
-            for e in range(max_viol._estagio, ef + 1):
+            for e in range(ei, ef + 1):
                 dadger.lq(codigo=max_viol._codigo, estagio=e)
 
         res: List[FlexibilizationResult] = []
@@ -469,8 +471,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
         def __assegura_existencia_registros(inv: InviabilidadeRE):
             # "Cria" todas as LUs até o último estágio da restrição RE
+            ei = dadger.re(codigo=inv._codigo).estagio_inicial
             ef = dadger.re(codigo=inv._codigo).estagio_final
-            for e in range(max_viol._estagio, ef + 1):
+            for e in range(ei, ef + 1):
                 dadger.lu(codigo=max_viol._codigo, estagio=e)
 
         res: List[FlexibilizationResult] = []
