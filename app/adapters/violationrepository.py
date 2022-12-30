@@ -309,6 +309,12 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             )
             if max_viol._limite == "L. INF":
                 valor_atual = reg.limite_inferior
+                if valor_atual is None:
+                    estagio_aux = max_viol._estagio
+                    while (valor_atual is None) and (estagio_aux > 0):
+                        estagio_aux -= 1
+                        valor_atual = dadger.lv(codigo=max_viol._codigo, estagio=estagio_aux).limite_inferior
+
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHV]
                 novo_valor = max([0, valor_atual - valor_flex])
                 dadger.lv(
@@ -316,6 +322,12 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 ).limite_inferior = novo_valor
             elif max_viol._limite == "L. SUP":
                 valor_atual = reg.limite_superior
+                if valor_atual is None:
+                    estagio_aux = max_viol._estagio
+                    while (valor_atual is None) and (estagio_aux > 0):
+                        estagio_aux -= 1
+                        valor_atual = dadger.lv(codigo=max_viol._codigo, estagio=estagio_aux).limite_superior
+
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHV]
                 novo_valor = min([99999, valor_atual + valor_flex])
                 dadger.lv(
@@ -389,6 +401,11 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             )
             if max_viol._limite == "L. INF":
                 valor_atual = reg.limites_inferiores[idx]
+                if valor_atual is None:
+                    estagio_aux = max_viol._estagio
+                    while (valor_atual is None) and (estagio_aux > 0):
+                        estagio_aux -= 1
+                        valor_atual = dadger.lq(codigo=max_viol._codigo, estagio=estagio_aux).limites_inferiores[idx]
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHQ]
                 novo_valor = max([0, valor_atual - valor_flex])
                 novos = reg.limites_inferiores
@@ -398,6 +415,12 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 ).limites_inferiores = novos
             elif max_viol._limite == "L. SUP":
                 valor_atual = reg.limites_superiores[idx]
+                if valor_atual is None:
+                    estagio_aux = max_viol._estagio
+                    while (valor_atual is None) and (estagio_aux > 0):
+                        estagio_aux -= 1
+                        valor_atual = dadger.lq(codigo=max_viol._codigo, estagio=estagio_aux).limites_superiores[idx]
+
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHQ]
                 novo_valor = min([99999, valor_atual + valor_flex])
                 novos = reg.limites_superiores
@@ -406,7 +429,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     codigo=max_viol._codigo, estagio=max_viol._estagio
                 ).limites_superiores = novos
             Log.log().info(
-                f" - {max_viol._limite}: "
+                f" {max_viol._limite}: "
                 + f"{valor_atual} -> {novo_valor}"
             )
             res.append(
@@ -473,6 +496,12 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             )
             if max_viol._limite == "L. INF":
                 valor_atual = reg.limites_inferiores[idx]
+                if valor_atual is None:
+                    estagio_aux = max_viol._estagio
+                    while (valor_atual is None) and (estagio_aux > 0):
+                        estagio_aux -= 1
+                        valor_atual = dadger.lu(codigo=max_viol._codigo, estagio=estagio_aux).limites_inferiores[idx]
+
                 valor_flex = max_viol._violacao + deltas[InviabilidadeRE]
                 novo_valor = max([0, valor_atual - valor_flex])
                 novos = reg.limites_inferiores
@@ -482,6 +511,12 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 ).limites_inferiores = novos
             elif max_viol._limite == "L. SUP":
                 valor_atual = reg.limites_superiores[idx]
+                if valor_atual is None:
+                    estagio_aux = max_viol._estagio
+                    while (valor_atual is None) and (estagio_aux > 0):
+                        estagio_aux -= 1
+                        valor_atual = dadger.lu(codigo=max_viol._codigo, estagio=estagio_aux).limites_superiores[idx]
+
                 valor_flex = max_viol._violacao + deltas[InviabilidadeRE]
                 novo_valor = min([99999, valor_atual + valor_flex])
                 novos = reg.limites_superiores
