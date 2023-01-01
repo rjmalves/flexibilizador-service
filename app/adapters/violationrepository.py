@@ -597,7 +597,11 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                         + f" para a usina {max_viol._codigo} "
                         + f" ({max_viol._usina}) = 0"
                     )
-                    reg_ac.influi = 0
+                    if isinstance(reg_ac, list):
+                        for r in reg_ac:
+                            r.influi = 0
+                    else:
+                        reg_ac.influi = 0
                 Log.log().warning(
                     "Flexibilizando FP - "
                     + "Não foi encontrado registro FP"
