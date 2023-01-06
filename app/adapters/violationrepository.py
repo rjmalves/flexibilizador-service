@@ -245,9 +245,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             novas_taxas = reg.taxas
             novas_taxas[idx] = novo_valor
             dadger.ti(codigo=max_viol._codigo).taxas = novas_taxas
-            Log.log().info(
-                f"{valor_atual} -> {novo_valor}"
-            )
+            Log.log().info(f"{valor_atual} -> {novo_valor}")
             res.append(
                 FlexibilizationResult(
                     flexType="TI",
@@ -314,7 +312,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
-                        valor_atual = dadger.lv(codigo=max_viol._codigo, estagio=estagio_aux).limite_inferior
+                        valor_atual = dadger.lv(
+                            codigo=max_viol._codigo, estagio=estagio_aux
+                        ).limite_inferior
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHV]
                 novo_valor = max([0, valor_atual - valor_flex])
@@ -327,7 +327,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
-                        valor_atual = dadger.lv(codigo=max_viol._codigo, estagio=estagio_aux).limite_superior
+                        valor_atual = dadger.lv(
+                            codigo=max_viol._codigo, estagio=estagio_aux
+                        ).limite_superior
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHV]
                 novo_valor = min([99999, valor_atual + valor_flex])
@@ -335,8 +337,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     codigo=max_viol._codigo, estagio=max_viol._estagio
                 ).limite_superior = novo_valor
             Log.log().info(
-                f" {max_viol._limite}: "
-                + f"{valor_atual} -> {novo_valor}"
+                f" {max_viol._limite}: " + f"{valor_atual} -> {novo_valor}"
             )
             res.append(
                 FlexibilizationResult(
@@ -407,7 +408,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
-                        valor_atual = dadger.lq(codigo=max_viol._codigo, estagio=estagio_aux).limites_inferiores[idx]
+                        valor_atual = dadger.lq(
+                            codigo=max_viol._codigo, estagio=estagio_aux
+                        ).limites_inferiores[idx]
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHQ]
                 novo_valor = max([0, valor_atual - valor_flex])
                 novos = reg.limites_inferiores
@@ -421,7 +424,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
-                        valor_atual = dadger.lq(codigo=max_viol._codigo, estagio=estagio_aux).limites_superiores[idx]
+                        valor_atual = dadger.lq(
+                            codigo=max_viol._codigo, estagio=estagio_aux
+                        ).limites_superiores[idx]
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHQ]
                 novo_valor = min([99999, valor_atual + valor_flex])
@@ -431,8 +436,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     codigo=max_viol._codigo, estagio=max_viol._estagio
                 ).limites_superiores = novos
             Log.log().info(
-                f" {max_viol._limite}: "
-                + f"{valor_atual} -> {novo_valor}"
+                f" {max_viol._limite}: " + f"{valor_atual} -> {novo_valor}"
             )
             res.append(
                 FlexibilizationResult(
@@ -503,7 +507,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
-                        valor_atual = dadger.lu(codigo=max_viol._codigo, estagio=estagio_aux).limites_inferiores[idx]
+                        valor_atual = dadger.lu(
+                            codigo=max_viol._codigo, estagio=estagio_aux
+                        ).limites_inferiores[idx]
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeRE]
                 novo_valor = max([0, valor_atual - valor_flex])
@@ -518,7 +524,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
-                        valor_atual = dadger.lu(codigo=max_viol._codigo, estagio=estagio_aux).limites_superiores[idx]
+                        valor_atual = dadger.lu(
+                            codigo=max_viol._codigo, estagio=estagio_aux
+                        ).limites_superiores[idx]
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeRE]
                 novo_valor = min([99999, valor_atual + valor_flex])
@@ -528,8 +536,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     codigo=max_viol._codigo, estagio=max_viol._estagio
                 ).limites_superiores = novos
             Log.log().info(
-                f" {max_viol._limite}: "
-                + f"{valor_atual} -> {novo_valor}"
+                f" {max_viol._limite}: " + f"{valor_atual} -> {novo_valor}"
             )
             res.append(
                 FlexibilizationResult(
@@ -754,8 +761,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 codigo=max_viol._codigo, estagio=max_viol._estagio
             ).limite = novo_valor
             Log.log().info(
-                f" {max_viol._limite}: "
-                + f"{valor_atual} -> {novo_valor}"
+                f" {max_viol._limite}: " + f"{valor_atual} -> {novo_valor}"
             )
             res.append(
                 FlexibilizationResult(
@@ -802,9 +808,6 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
         # (estagio, subsis) já flexibilizados
         flexibilizados: List[Tuple[int, str]] = []
         for inv in inviabilidades:
-            # Ignora os cenários do 2º mês
-            if inv._estagio == dadger.lista_registros(DP)[-1].estagio:
-                continue
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
             if identificacao in flexibilizados:
@@ -831,6 +834,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                                 + f" código {cm.codigo} para "
                                 + f"o estágio {max_viol._estagio}."
                             )
+                            continue
                         valor_atual = reg.limite
                         deltas = (
                             AbsoluteViolationRepository.deltas_inviabilidades
