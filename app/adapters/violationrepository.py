@@ -307,6 +307,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 + f" {max_viol._estagio}"
             )
             if max_viol._limite == "L. INF":
+                # PREMISSA:
+                # Uma HV que envolva mais de uma usina (tipo restrição
+                # de igualdade de cotas) pode assumir valores < 0.
                 valor_atual = reg.limite_inferior
                 if valor_atual is None:
                     estagio_aux = max_viol._estagio
@@ -317,7 +320,12 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                         ).limite_inferior
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHV]
-                novo_valor = max([0, valor_atual - valor_flex])
+                # Confere quantos CV a HV possui:
+                cvs_hv = dadger.cv(restricao=max_viol._codigo)
+                if isinstance(cvs_hv, list):
+                    novo_valor = valor_atual - valor_flex
+                else:
+                    novo_valor = max([0, valor_atual - valor_flex])
                 dadger.lv(
                     codigo=max_viol._codigo, estagio=max_viol._estagio
                 ).limite_inferior = novo_valor
