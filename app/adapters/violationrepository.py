@@ -326,19 +326,20 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 if isinstance(cvs_hv, list):
                     novo_valor = valor_atual - valor_flex
                     if novo_valor < 0:
-                        hv = dadger.hv(codigo=max_viol._codigo)
-                        for estagio in range(
-                            hv.estagio_inicial, hv.estagio_final + 1
-                        ):
-                            lv = dadger.lv(
-                                codigo=max_viol._codigo, estagio=estagio
-                            )
-                            lv.limite_inferior, lv.limite_superior = (
-                                lv.limite_superior,
-                                lv.limite_inferior,
-                            )
-                        for cv in cvs_hv:
-                            cv.coeficiente *= -1
+                        novo_valor = max([0, novo_valor])
+                        # hv = dadger.hv(codigo=max_viol._codigo)
+                        # for estagio in range(
+                        #     hv.estagio_inicial, hv.estagio_final + 1
+                        # ):
+                        #     lv = dadger.lv(
+                        #         codigo=max_viol._codigo, estagio=estagio
+                        #     )
+                        #     lv.limite_inferior, lv.limite_superior = (
+                        #         lv.limite_superior,
+                        #         lv.limite_inferior,
+                        #     )
+                        # for cv in cvs_hv:
+                        #     cv.coeficiente *= -1
                 else:
                     novo_valor = max([0, valor_atual - valor_flex])
                 dadger.lv(
