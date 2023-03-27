@@ -844,6 +844,8 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             for r in rees_subsistema[max_viol._subsistema]:
                 # Lista as restrições RHE
                 cms: List[CM] = dadger.cm()
+                if cms is None:
+                    return []
                 cms_ree = [c for c in cms if c.ree == r]
                 # Se tiver pelo menos um CM para o REE, flexibiliza os
                 # RHE que existirem, para os respectivos estágios
