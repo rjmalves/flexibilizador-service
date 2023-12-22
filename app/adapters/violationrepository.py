@@ -6,7 +6,6 @@ from idecomp.decomp.modelos.dadger import (
     ACVAZMIN,
     ACVERTJU,
     ACNPOSNW,
-    DP,
     FP,
     CM,
 )
@@ -26,7 +25,6 @@ from app.utils.log import Log
 
 
 class AbstractViolationRepository(ABC):
-
     tipos_inviabilidades = [
         InviabilidadeEV,
         InviabilidadeTI,
@@ -96,7 +94,6 @@ class AbstractViolationRepository(ABC):
     def flexibilize(
         self, dadger: Dadger, inviabilidades: List[Inviabilidade]
     ) -> List[FlexibilizationResult]:
-
         # Agrupa as inviabilidades por tipo
         tipos = AbstractViolationRepository.tipos_inviabilidades
         invs_por_tipo: dict = {t: [] for t in tipos}
@@ -135,7 +132,6 @@ class AbstractViolationRepository(ABC):
 
 
 class AbsoluteViolationRepository(AbstractViolationRepository):
-
     deltas_inviabilidades = {
         InviabilidadeEV: 0,
         InviabilidadeTI: 0.2,
@@ -238,13 +234,13 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             )
             idx = max_viol._estagio - 1
             reg = dadger.ti(codigo=max_viol._codigo)
-            valor_atual = reg.taxas[idx]
+            valor_atual = reg.taxa[idx]
             deltas = AbsoluteViolationRepository.deltas_inviabilidades
             valor_flex = max_viol._violacao + deltas[InviabilidadeTI]
             novo_valor = max([0, valor_atual - valor_flex])
-            novas_taxas = reg.taxas
+            novas_taxas = reg.taxa
             novas_taxas[idx] = novo_valor
-            dadger.ti(codigo=max_viol._codigo).taxas = novas_taxas
+            dadger.ti(codigo=max_viol._codigo).taxa = novas_taxas
             Log.log().info(f"{valor_atual} -> {novo_valor}")
             res.append(
                 FlexibilizationResult(
@@ -427,38 +423,38 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 + f" {max_viol._estagio} pat {max_viol._patamar}"
             )
             if max_viol._limite == "L. INF":
-                valor_atual = reg.limites_inferiores[idx]
+                valor_atual = reg.limite_inferior[idx]
                 if valor_atual is None:
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
                         valor_atual = dadger.lq(
                             codigo=max_viol._codigo, estagio=estagio_aux
-                        ).limites_inferiores[idx]
+                        ).limite_inferior[idx]
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHQ]
                 novo_valor = max([0, valor_atual - valor_flex])
-                novos = reg.limites_inferiores
+                novos = reg.limite_inferior
                 novos[idx] = novo_valor
                 dadger.lq(
                     codigo=max_viol._codigo, estagio=max_viol._estagio
-                ).limites_inferiores = novos
+                ).limite_inferior = novos
             elif max_viol._limite == "L. SUP":
-                valor_atual = reg.limites_superiores[idx]
+                valor_atual = reg.limite_superior[idx]
                 if valor_atual is None:
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
                         valor_atual = dadger.lq(
                             codigo=max_viol._codigo, estagio=estagio_aux
-                        ).limites_superiores[idx]
+                        ).limite_superior[idx]
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHQ]
                 novo_valor = min([99999, valor_atual + valor_flex])
-                novos = reg.limites_superiores
+                novos = reg.limite_superior
                 novos[idx] = novo_valor
                 dadger.lq(
                     codigo=max_viol._codigo, estagio=max_viol._estagio
-                ).limites_superiores = novos
+                ).limite_superior = novos
             Log.log().info(
                 f" {max_viol._limite}: " + f"{valor_atual} -> {novo_valor}"
             )
@@ -526,39 +522,39 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 + f" {max_viol._estagio} pat {max_viol._patamar}"
             )
             if max_viol._limite == "L. INF":
-                valor_atual = reg.limites_inferiores[idx]
+                valor_atual = reg.limite_inferior[idx]
                 if valor_atual is None:
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
                         valor_atual = dadger.lu(
                             codigo=max_viol._codigo, estagio=estagio_aux
-                        ).limites_inferiores[idx]
+                        ).limite_inferior[idx]
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeRE]
                 novo_valor = max([0, valor_atual - valor_flex])
-                novos = reg.limites_inferiores
+                novos = reg.limite_inferior
                 novos[idx] = novo_valor
                 dadger.lu(
                     codigo=max_viol._codigo, estagio=max_viol._estagio
-                ).limites_inferiores = novos
+                ).limite_inferior = novos
             elif max_viol._limite == "L. SUP":
-                valor_atual = reg.limites_superiores[idx]
+                valor_atual = reg.limite_superior[idx]
                 if valor_atual is None:
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
                         valor_atual = dadger.lu(
                             codigo=max_viol._codigo, estagio=estagio_aux
-                        ).limites_superiores[idx]
+                        ).limite_superior[idx]
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeRE]
                 novo_valor = min([99999, valor_atual + valor_flex])
-                novos = reg.limites_superiores
+                novos = reg.limite_superior
                 novos[idx] = novo_valor
                 dadger.lu(
                     codigo=max_viol._codigo, estagio=max_viol._estagio
-                ).limites_superiores = novos
+                ).limite_superior = novos
             Log.log().info(
                 f" {max_viol._limite}: " + f"{valor_atual} -> {novo_valor}"
             )
@@ -619,8 +615,10 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     )
                     reg_ac_novo = ACVERTJU()
                     reg_ac_novo.uhe = max_viol._codigo
-                    reg_ac_novo.influi = 0
-                    dadger.cria_registro(dadger.ac(169, ACNPOSNW), reg_ac_novo)
+                    reg_ac_novo.considera_influencia = 0
+                    dadger.data.add_after(
+                        dadger.ac(169, ACNPOSNW), reg_ac_novo
+                    )
                 else:
                     Log.log().info(
                         "Flexibilizando FP - "
@@ -630,9 +628,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     )
                     if isinstance(reg_ac, list):
                         for r in reg_ac:
-                            r.influi = 0
+                            r.considera_influencia = 0
                     else:
-                        reg_ac.influi = 0
+                        reg_ac.considera_influencia = 0
                 Log.log().warning(
                     "Flexibilizando FP - "
                     + "Não foi encontrado registro FP"
@@ -640,7 +638,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     + f" ({max_viol._usina})"
                 )
                 reg_fp_novo = FP()
-                reg_fp_novo.codigo = max_viol._codigo
+                reg_fp_novo.codigo_usina = max_viol._codigo
                 reg_fp_novo.estagio = 1
                 reg_fp_novo.tipo_entrada_janela_turbinamento = 0
                 reg_fp_novo.numero_pontos_turbinamento = 20
@@ -650,7 +648,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 reg_fp_novo.numero_pontos_volume = 20
                 reg_fp_novo.limite_inferior_janela_volume = 100
                 reg_fp_novo.limite_superior_janela_volume = 100
-                dadger.cria_registro(dadger.fc(tipo="NEWCUT"), reg_fp_novo)
+                dadger.data.add_after(dadger.fc(tipo="NEWCUT"), reg_fp_novo)
                 res.append(
                     FlexibilizationResult(
                         flexType="FP",
@@ -706,9 +704,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     + f" ({max_viol._usina})"
                 )
                 reg_ac_novo = ACVAZMIN()
-                reg_ac_novo.uhe = max_viol._codigo
+                reg_ac_novo.codigo_usina = max_viol._codigo
                 reg_ac_novo.vazao = max_viol._vazmin_hidr
-                dadger.cria_registro(dadger.ac(169, ACNPOSNW), reg_ac_novo)
+                dadger.data.add_after(dadger.ac(169, ACNPOSNW), reg_ac_novo)
                 reg_ac = reg_ac_novo
 
             # Flexibiliza
@@ -846,18 +844,19 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 cms: List[CM] = dadger.cm()
                 if cms is None:
                     return []
-                cms_ree = [c for c in cms if c.ree == r]
+                cms_ree = [c for c in cms if c.codigo_ree == r]
                 # Se tiver pelo menos um CM para o REE, flexibiliza os
                 # RHE que existirem, para os respectivos estágios
                 if len(cms_ree) > 0:
                     for cm in cms_ree:
                         reg = dadger.he(
-                            codigo=cm.codigo, estagio=max_viol._estagio
+                            codigo=cm.codigo_restricao,
+                            estagio=max_viol._estagio,
                         )
                         if reg is None:
                             Log.log().warning(
                                 "Não encontrada restrição HE com"
-                                + f" código {cm.codigo} para "
+                                + f" código {cm.codigo_restricao} para "
                                 + f"o estágio {max_viol._estagio}."
                             )
                             continue
@@ -869,10 +868,11 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                         valor_flex = max_viol._violacao_percentual + delta
                         novo_valor = max([0.0, valor_atual - valor_flex])
                         dadger.he(
-                            codigo=cm.codigo, estagio=max_viol._estagio
+                            codigo=cm.codigo_restricao,
+                            estagio=max_viol._estagio,
                         ).limite = novo_valor
                         msg = (
-                            f"Flexibilizando (DEFICIT) HE {reg.codigo} -"
+                            f"Flexibilizando (DEFICIT) HE {reg.codigo_restricao} -"
                             + f"Estágio {max_viol._estagio} -"
                             + f"{reg.tipo_penalidade}: {valor_atual} ->"
                             + f" {novo_valor}"
@@ -880,7 +880,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                         Log.log().info(msg)
                         if novo_valor == 0:
                             Log.log().warning(
-                                f"Valor da HE {reg.codigo} chegou a"
+                                f"Valor da HE {reg.codigo_restricao} chegou a"
                                 + " 0. e deveria ser"
                                 + f" {valor_atual - valor_flex}"
                                 + " pelo déficit"
@@ -889,7 +889,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                             FlexibilizationResult(
                                 flexType="DEFICIT",
                                 flexStage=max_viol._estagio,
-                                flexCode=reg.codigo,
+                                flexCode=reg.codigo_restricao,
                                 flexPatamar=None,
                                 flexLimit=None,
                                 flexSubsystem=identificacao[1],

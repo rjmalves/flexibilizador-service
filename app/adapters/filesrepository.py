@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Type, Optional
 import pathlib
-import asyncio
+from os.path import join
 
 from idecomp.decomp.caso import Caso
 from idecomp.decomp.arquivos import Arquivos
@@ -52,7 +52,7 @@ class RawFilesRepository(AbstractFilesRepository):
     def __init__(self, tmppath: str):
         self.__tmppath = tmppath
         try:
-            self.__caso = Caso.le_arquivo(str(self.__tmppath))
+            self.__caso = Caso.read(join(str(self.__tmppath), "caso.dat"))
         except FileNotFoundError as e:
             Log.log().error("Não foi encontrado o arquivo caso.dat")
             raise e
@@ -74,8 +74,8 @@ class RawFilesRepository(AbstractFilesRepository):
     def arquivos(self) -> Arquivos:
         if self.__arquivos is None:
             try:
-                self.__arquivos = Arquivos.le_arquivo(
-                    self.__tmppath, self.__caso.arquivos
+                self.__arquivos = Arquivos.read(
+                    join(self.__tmppath, self.__caso.arquivos)
                 )
             except FileNotFoundError as e:
                 Log.log().error(
@@ -96,9 +96,7 @@ class RawFilesRepository(AbstractFilesRepository):
                 )
                 await converte_codificacao(caminho, script)
                 Log.log().info(f"Lendo arquivo {self.arquivos.dadger}")
-                self.__dadger = Dadger.le_arquivo(
-                    self.__tmppath, self.arquivos.dadger
-                )
+                self.__dadger = Dadger.read(caminho)
             except Exception as e:
                 Log.log().error(
                     f"Erro na leitura do {self.arquivos.dadger}: {e}"
@@ -108,7 +106,7 @@ class RawFilesRepository(AbstractFilesRepository):
 
     def set_dadger(self, d: Dadger) -> HTTPResponse:
         try:
-            d.escreve_arquivo(self.__tmppath, self.arquivos.dadger)
+            d.write(join(self.__tmppath, self.arquivos.dadger))
             return HTTPResponse(code=200, detail="")
         except Exception as e:
             return HTTPResponse(code=500, detail=str(e))
@@ -118,8 +116,8 @@ class RawFilesRepository(AbstractFilesRepository):
             self.__read_relato = True
             try:
                 Log.log().info(f"Lendo arquivo relato.{self.caso.arquivos}")
-                self.__relato = Relato.le_arquivo(
-                    self.__tmppath, f"relato.{self.caso.arquivos}"
+                self.__relato = Relato.read(
+                    join(self.__tmppath, f"relato.{self.caso.arquivos}")
                 )
             except Exception as e:
                 Log.log().error(
@@ -135,8 +133,8 @@ class RawFilesRepository(AbstractFilesRepository):
                 Log.log().info(
                     f"Lendo arquivo inviab_unic.{self.caso.arquivos}"
                 )
-                self.__inviabunic = InviabUnic.le_arquivo(
-                    self.__tmppath, f"inviab_unic.{self.caso.arquivos}"
+                self.__inviabunic = InviabUnic.read(
+                    join(self.__tmppath, f"inviab_unic.{self.caso.arquivos}")
                 )
             except FileNotFoundError as e:
                 Log.log().info(
@@ -155,8 +153,8 @@ class RawFilesRepository(AbstractFilesRepository):
             self.__read_hidr = True
             try:
                 Log.log().info(f"Lendo arquivo {self.arquivos.hidr}")
-                self.__hidr = Hidr.le_arquivo(
-                    self.__tmppath, self.arquivos.hidr
+                self.__hidr = Hidr.read(
+                    join(self.__tmppath, self.arquivos.hidr)
                 )
             except Exception as e:
                 Log.log().error(

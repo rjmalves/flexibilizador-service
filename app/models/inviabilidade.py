@@ -147,7 +147,6 @@ class InviabilidadeTI(Inviabilidade):
         unidade: str,
         hidr: Hidr,
     ):
-
         super().__init__(
             iteracao, estagio, cenario, mensagem_restricao, violacao, unidade
         )
@@ -182,7 +181,6 @@ class InviabilidadeHQ(Inviabilidade):
         violacao: float,
         unidade: str,
     ):
-
         super().__init__(
             iteracao, estagio, cenario, mensagem_restricao, violacao, unidade
         )
@@ -216,7 +214,6 @@ class InviabilidadeHV(Inviabilidade):
         violacao: float,
         unidade: str,
     ):
-
         super().__init__(
             iteracao, estagio, cenario, mensagem_restricao, violacao, unidade
         )
@@ -318,7 +315,6 @@ class InviabilidadeEV(Inviabilidade):
         unidade: str,
         hidr: Hidr,
     ):
-
         super().__init__(
             iteracao, estagio, cenario, mensagem_restricao, violacao, unidade
         )
@@ -440,7 +436,6 @@ class InviabilidadeDeficit(Inviabilidade):
         unidade: str,
         relato: Relato,
     ):
-
         super().__init__(
             iteracao, estagio, cenario, mensagem_restricao, violacao, unidade
         )
@@ -466,10 +461,10 @@ class InviabilidadeDeficit(Inviabilidade):
         # Duração dos patamares
         try:
             merc = relato.dados_mercado
-            cols_pat = [c for c in merc.columns if "Patamar" in c]
+            cols_pat = [c for c in merc.columns if "patamar" in c]
             duracoes = merc.loc[
-                (merc["Estágio"] == self._estagio)
-                & (merc["Subsistema"] == subsis),
+                (merc["estagio"] == self._estagio)
+                & (merc["nome_submercado"] == subsis),
                 cols_pat,
             ].to_numpy()[0]
             fracao = duracoes[pat - 1] / np.sum(duracoes)
@@ -478,9 +473,12 @@ class InviabilidadeDeficit(Inviabilidade):
             violacao_ponderada = 0
         # EARMax
         try:
-            earmax = relato.energia_armazenada_maxima_subsistema
+            earmax = relato.energia_armazenada_maxima_submercado
             earmax_subsis = float(
-                earmax.loc[earmax["Subsistema"] == subsis, "Earmax"]
+                earmax.loc[
+                    earmax["nome_submercado"] == subsis,
+                    "energia_armazenada_maxima",
+                ]
             )
         except ValueError:
             earmax_subsis = np.inf
