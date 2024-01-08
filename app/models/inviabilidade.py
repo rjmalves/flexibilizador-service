@@ -166,7 +166,9 @@ class InviabilidadeTI(Inviabilidade):
         hidr: Hidr = args[0]
         nome = self._mensagem_restricao.split("IRRIGACAO, USINA")[1].strip()
         codigo = int(
-            list(hidr.cadastro.loc[hidr.cadastro["Nome"] == nome, :].index)[0]
+            list(
+                hidr.cadastro.loc[hidr.cadastro["nome_usina"] == nome, :].index
+            )[0]
         )
         return [codigo, nome]
 
@@ -334,7 +336,9 @@ class InviabilidadeEV(Inviabilidade):
         hidr: Hidr = args[0]
         nome = self._mensagem_restricao.split("EVAPORACAO, USINA")[1].strip()
         codigo = int(
-            list(hidr.cadastro.loc[hidr.cadastro["Nome"] == nome, :].index)[0]
+            list(
+                hidr.cadastro.loc[hidr.cadastro["nome_usina"] == nome, :].index
+            )[0]
         )
         return [codigo, nome]
 
@@ -374,12 +378,15 @@ class InviabilidadeDEFMIN(Inviabilidade):
         pat = int(self._mensagem_restricao.split(p)[1].split(u)[0].strip())
         nome = self._mensagem_restricao.split(u)[1].strip()
         codigo = int(
-            list(hidr.cadastro.loc[hidr.cadastro["Nome"] == nome, :].index)[0]
+            list(
+                hidr.cadastro.loc[hidr.cadastro["nome_usina"] == nome, :].index
+            )[0]
         )
         vazmin_hidr = int(
             list(
                 hidr.cadastro.loc[
-                    hidr.cadastro["Nome"] == nome, "Vazão Mínima Histórica"
+                    hidr.cadastro["nome_usina"] == nome,
+                    "vazao_minima_historica",
                 ]
             )[0]
         )
@@ -420,7 +427,9 @@ class InviabilidadeFP(Inviabilidade):
         pat = int(self._mensagem_restricao.split(p)[1])
         nome = self._mensagem_restricao.split(u)[1].split(",")[0].strip()
         codigo = int(
-            list(hidr.cadastro.loc[hidr.cadastro["Nome"] == nome, :].index)[0]
+            list(
+                hidr.cadastro.loc[hidr.cadastro["nome_usina"] == nome, :].index
+            )[0]
         )
         return [codigo, nome, pat]
 
