@@ -33,15 +33,15 @@ class Inviabilidade:
     def factory(
         linha_inviab_unic: pd.Series, hidr: Hidr, relato: Relato
     ) -> "Inviabilidade":
-        if "Iteração" in list(linha_inviab_unic.index):
-            iteracao = int(linha_inviab_unic["Iteração"])
+        if "iteracao" in list(linha_inviab_unic.index):
+            iteracao = int(linha_inviab_unic["iteracao"])
         else:
             iteracao = -1
-        estagio = int(linha_inviab_unic["Estágio"])
-        cenario = int(linha_inviab_unic["Cenário"])
-        mensagem_restricao = str(linha_inviab_unic["Restrição"])
-        violacao = float(linha_inviab_unic["Violação"])
-        unidade = str(linha_inviab_unic["Unidade"])
+        estagio = int(linha_inviab_unic["estagio"])
+        cenario = int(linha_inviab_unic["cenario"])
+        mensagem_restricao = str(linha_inviab_unic["restricao"])
+        violacao = float(linha_inviab_unic["violacao"])
+        unidade = str(linha_inviab_unic["unidade"])
         if "RESTRICAO ELETRICA" in mensagem_restricao:
             return InviabilidadeRE(
                 iteracao,
