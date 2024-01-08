@@ -321,7 +321,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeHV]
                 # Confere quantos CV a HV possui:
-                cvs_hv = dadger.cv(restricao=max_viol._codigo)
+                cvs_hv = dadger.cv(codigo_restricao=max_viol._codigo)
                 if isinstance(cvs_hv, list):
                     novo_valor = valor_atual - valor_flex
                     if novo_valor < 0:
