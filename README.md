@@ -190,3 +190,5 @@ Os campos informados são:
 - `id`: o caminho para o diretório do caso codificado em `base62` 
 - `program`:  nome do programa. Atualmente somente casos de `DECOMP` são suportados para flexibilização.  
 - `rules`: lista (opcional) de objetos `FlexibilizaçãoRule`, descritos em uma seção anterior.
+
+A resposta, caso a flexibilização seja realizada com sucesso, contém um objeto com uma lista de `FlexibilizationResult`.
