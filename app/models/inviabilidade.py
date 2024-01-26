@@ -462,7 +462,8 @@ class InviabilidadeDeficit(Inviabilidade):
         )
 
     def processa_mensagem(self, *args) -> list:
-        relato: Relato = args[0]
+        relato = args[0]
+        assert isinstance(relato, Relato)
         msg = self._mensagem_restricao
         subsis = msg.split("SUBSISTEMA ")[1].split(",")[0].strip()
         pat = int(msg.split("PATAMAR")[1].strip())
@@ -470,6 +471,7 @@ class InviabilidadeDeficit(Inviabilidade):
         # Duração dos patamares
         try:
             merc = relato.dados_mercado
+            assert isinstance(merc, pd.DataFrame)
             cols_pat = [c for c in merc.columns if "patamar" in c]
             duracoes = merc.loc[
                 (merc["estagio"] == self._estagio)
@@ -483,12 +485,11 @@ class InviabilidadeDeficit(Inviabilidade):
         # EARMax
         try:
             earmax = relato.energia_armazenada_maxima_submercado
-            earmax_subsis = float(
-                earmax.loc[
-                    earmax["nome_submercado"] == subsis,
-                    "energia_armazenada_maxima",
-                ]
-            )
+            assert isinstance(earmax, pd.DataFrame)
+            earmax_subsis = earmax.loc[
+                earmax["nome_submercado"] == subsis,
+                "energia_armazenada_maxima",
+            ].iloc[0]
         except ValueError:
             earmax_subsis = np.inf
         # Calcula a violação em percentual

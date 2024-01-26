@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
-from app.models.flexibilizationrule import FlexibilizationRule
+from typing import Optional
 
 
 class FlexibilizationRequest(BaseModel):

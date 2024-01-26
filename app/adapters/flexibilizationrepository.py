@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Union
-
+from typing import Dict, List, Union, Type
+import pandas as pd  # type: ignore
 from app.internal.httpresponse import HTTPResponse
 from app.models.flexibilizationrule import FlexibilizationRule
 from app.models.flexibilizationresult import FlexibilizationResult
@@ -8,6 +8,7 @@ from app.models.inviabilidade import Inviabilidade
 from app.adapters.violationrepository import AbsoluteViolationRepository
 from app.services.unitofwork import AbstractUnitOfWork
 from app.utils.log import Log
+from idecomp.decomp import InviabUnic
 
 
 class AbstractFlexibilizationRepository(ABC):
@@ -44,7 +45,10 @@ class DECOMPFlexibilizationRepository(AbstractFlexibilizationRepository):
         try:
             with uow:
                 dadger = await uow.files.get_dadger()
-                inviab = uow.files.get_inviabunic().inviabilidades_simulacao_final
+                arq_inviab = uow.files.get_inviabunic()
+                assert isinstance(arq_inviab, InviabUnic)
+                inviab = arq_inviab.inviabilidades_simulacao_final
+                assert isinstance(inviab, pd.DataFrame)
                 relato = uow.files.get_relato()
                 hidr = uow.files.get_hidr()
                 # Cria as inviabilidades
@@ -70,7 +74,7 @@ class DECOMPFlexibilizationRepository(AbstractFlexibilizationRepository):
             return HTTPResponse(code=500, detail=str(e))
 
 
-SUPPORTED_PROGRAMS: Dict[str, AbstractFlexibilizationRepository] = {
+SUPPORTED_PROGRAMS: Dict[str, Type[AbstractFlexibilizationRepository]] = {
     "NEWAVE": NEWAVEFlexibilizationRepository,
     "DECOMP": DECOMPFlexibilizationRepository,
 }
@@ -78,7 +82,4 @@ DEFAULT = DECOMPFlexibilizationRepository
 
 
 def factory(kind: str, *args, **kwargs) -> AbstractFlexibilizationRepository:
-    s = SUPPORTED_PROGRAMS.get(kind)
-    if s is None:
-        return DEFAULT(*args, **kwargs)
-    return s(*args, **kwargs)
+    return SUPPORTED_PROGRAMS.get(kind, DEFAULT)(*args, **kwargs)
