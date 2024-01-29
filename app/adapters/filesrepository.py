@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Type, Optional, Union
+from typing import Dict, Type, Union
 import pathlib
 from os.path import join
 
@@ -24,11 +24,11 @@ class AbstractFilesRepository(ABC):
 
     @property
     @abstractmethod
-    def arquivos(self) -> Arquivos:
+    def arquivos(self) -> Union[Arquivos, HTTPResponse]:
         raise NotImplementedError
 
     @abstractmethod
-    async def get_dadger(self) -> Dadger:
+    async def get_dadger(self) -> Union[Dadger, HTTPResponse]:
         raise NotImplementedError
 
     @abstractmethod
@@ -36,15 +36,15 @@ class AbstractFilesRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_inviabunic(self) -> Optional[InviabUnic]:
+    def get_inviabunic(self) -> Union[InviabUnic, HTTPResponse]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_relato(self) -> Relato:
+    def get_relato(self) -> Union[Relato, HTTPResponse]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_hidr(self) -> Hidr:
+    def get_hidr(self) -> Union[Hidr, HTTPResponse]:
         raise NotImplementedError
 
 
@@ -55,7 +55,9 @@ class RawFilesRepository(AbstractFilesRepository):
             self.__caso = Caso.read(join(str(self.__path), "caso.dat"))
         except FileNotFoundError:
             Log.log().error("Não foi encontrado o arquivo caso.dat")
-        self.__arquivos: Optional[Arquivos] = None
+        self.__arquivos: Union[Arquivos, HTTPResponse] = HTTPResponse(
+            code=404, detail=""
+        )
         self.__dadger: Union[Dadger, HTTPResponse] = HTTPResponse(
             code=404, detail=""
         )
@@ -79,7 +81,7 @@ class RawFilesRepository(AbstractFilesRepository):
 
     @property
     def arquivos(self) -> Union[Arquivos, HTTPResponse]:
-        if self.__arquivos is None:
+        if isinstance(self.__arquivos, HTTPResponse):
             try:
                 self.__arquivos = Arquivos.read(
                     join(self.__path, self.__caso.arquivos)
@@ -87,7 +89,7 @@ class RawFilesRepository(AbstractFilesRepository):
             except FileNotFoundError:
                 msg = f"Não foi encontrado o arquivo {self.__caso.arquivos}"
                 Log.log().error(msg)
-                return HTTPResponse(code=404, detail=msg)
+                self.__arquivos = HTTPResponse(code=404, detail=msg)
         return self.__arquivos
 
     async def get_dadger(self) -> Union[Dadger, HTTPResponse]:
@@ -147,7 +149,7 @@ class RawFilesRepository(AbstractFilesRepository):
                 return HTTPResponse(code=500, detail=str(e))
         return self.__relato
 
-    def get_inviabunic(self) -> Optional[InviabUnic]:
+    def get_inviabunic(self) -> Union[InviabUnic, HTTPResponse]:
         if self.__read_inviabunic is False:
             self.__read_inviabunic = True
             try:
@@ -158,15 +160,17 @@ class RawFilesRepository(AbstractFilesRepository):
                     join(self.__path, f"inviab_unic.{self.caso.arquivos}")
                 )
             except FileNotFoundError:
-                Log.log().info(
+                msg = (
                     f"Não encontrado arquivo inviab_unic.{self.caso.arquivos}"
                 )
-                return None
+                Log.log().info(msg)
+                self.__inviabunic = HTTPResponse(code=404, detail=msg)
             except Exception as e:
-                Log.log().info(
+                msg = (
                     f"Erro na leitura do inviab_unic.{self.caso.arquivos}: {e}"
                 )
-                return None
+                Log.log().info(msg)
+                self.__inviabunic = HTTPResponse(code=404, detail=msg)
         return self.__inviabunic
 
     def get_hidr(self) -> Union[Hidr, HTTPResponse]:
@@ -183,10 +187,10 @@ class RawFilesRepository(AbstractFilesRepository):
                 self.__hidr = Hidr.read(join(self.__path, arq_hidr))
             except FileNotFoundError:
                 msg = "Não foi encontrado o arquivo hidr"
-                return HTTPResponse(code=404, detail=msg)
+                self.__hidr = HTTPResponse(code=404, detail=msg)
             except Exception as e:
                 Log.log().error(f"Erro na leitura do hidr: {e}")
-                return HTTPResponse(code=500, detail=str(e))
+                self.__hidr = HTTPResponse(code=500, detail=str(e))
         return self.__hidr
 
 

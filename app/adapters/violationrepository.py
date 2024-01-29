@@ -4,12 +4,12 @@ import numpy as np  # type: ignore
 from idecomp.decomp.dadger import Dadger
 from idecomp.decomp.modelos.dadger import (
     UH,
+    FC,
     TI,
     ACVAZMIN,
     ACVERTJU,
     ACNPOSNW,
     FP,
-    CM,
     HE,
     HV,
     LV,
@@ -402,7 +402,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
     ) -> List[FlexibilizationResult]:
         def __identifica_inv(
             inv: InviabilidadeHQ,
-        ) -> Tuple[int, int, str, int]:
+        ) -> Tuple[int, int, str, str]:
             return (inv._codigo, inv._estagio, inv._limite, inv._patamar)
 
         def __inv_maxima_violacao_identificada(
@@ -432,7 +432,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
         res: List[FlexibilizationResult] = []
         # Estrutura para conter as tuplas
         # (código, estágio, limite, patamar) já flexibilizados
-        flexibilizados: List[Tuple[int, int, str, int]] = []
+        flexibilizados: List[Tuple[int, int, str, str]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -516,7 +516,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
     ) -> List[FlexibilizationResult]:
         def __identifica_inv(
             inv: InviabilidadeRE,
-        ) -> Tuple[int, int, str, int]:
+        ) -> Tuple[int, int, str, str]:
             return (inv._codigo, inv._estagio, inv._limite, inv._patamar)
 
         def __inv_maxima_violacao_identificada(
@@ -546,7 +546,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
         res: List[FlexibilizationResult] = []
         # Estrutura para conter as tuplas
         # (código, estágio, limite, patamar) já flexibilizados
-        flexibilizados: List[Tuple[int, int, str, int]] = []
+        flexibilizados: List[Tuple[int, int, str, str]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -560,6 +560,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             reg = dadger.lu(
                 codigo_restricao=max_viol._codigo, estagio=max_viol._estagio
             )
+            assert isinstance(reg, LU)
             deltas = AbsoluteViolationRepository.deltas_inviabilidades
             idx = max_viol._patamar - 1
             Log.log().info(
@@ -567,43 +568,51 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 + f" {max_viol._estagio} pat {max_viol._patamar}"
             )
             if max_viol._limite == "L. INF":
-                valor_atual = reg.limite_inferior[idx]
+                limites = reg.limite_inferior
+                assert isinstance(limites, list)
+                valor_atual = limites[idx]
                 if valor_atual is None:
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
-                        valor_atual = dadger.lu(
+                        reg_aux = dadger.lu(
                             codigo_restricao=max_viol._codigo,
                             estagio=estagio_aux,
-                        ).limite_inferior[idx]
+                        )
+                        assert isinstance(reg_aux, LU)
+                        limites_aux = reg_aux.limite_inferior
+                        assert isinstance(limites_aux, list)
+                        valor_atual = limites_aux[idx]
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeRE]
                 novo_valor = max([0, valor_atual - valor_flex])
                 novos = reg.limite_inferior
+                assert isinstance(novos, list)
                 novos[idx] = novo_valor
-                dadger.lu(
-                    codigo_restricao=max_viol._codigo,
-                    estagio=max_viol._estagio,
-                ).limite_inferior = novos
+                reg.limite_inferior = novos
             elif max_viol._limite == "L. SUP":
-                valor_atual = reg.limite_superior[idx]
+                limites = reg.limite_superior
+                assert isinstance(limites, list)
+                valor_atual = limites[idx]
                 if valor_atual is None:
                     estagio_aux = max_viol._estagio
                     while (valor_atual is None) and (estagio_aux > 0):
                         estagio_aux -= 1
-                        valor_atual = dadger.lu(
+                        reg_aux = dadger.lu(
                             codigo_restricao=max_viol._codigo,
                             estagio=estagio_aux,
-                        ).limite_superior[idx]
+                        )
+                        assert isinstance(reg_aux, LU)
+                        limites_aux = reg_aux.limite_superior
+                        assert isinstance(limites_aux, list)
+                        valor_atual = limites_aux[idx]
 
                 valor_flex = max_viol._violacao + deltas[InviabilidadeRE]
                 novo_valor = min([99999, valor_atual + valor_flex])
                 novos = reg.limite_superior
+                assert isinstance(novos, list)
                 novos[idx] = novo_valor
-                dadger.lu(
-                    codigo_restricao=max_viol._codigo,
-                    estagio=max_viol._estagio,
-                ).limite_superior = novos
+                reg.limite_superior = novos
             Log.log().info(
                 f" {max_viol._limite}: " + f"{valor_atual} -> {novo_valor}"
             )
@@ -698,7 +707,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                 reg_fp_novo.numero_pontos_volume = 20
                 reg_fp_novo.limite_inferior_janela_volume = 100
                 reg_fp_novo.limite_superior_janela_volume = 100
-                dadger.data.add_after(dadger.fc(tipo="NEWCUT"), reg_fp_novo)
+                reg_fc = dadger.fc(tipo="NEWCUT")
+                assert isinstance(reg_fc, FC)
+                dadger.data.add_after(reg_fc, reg_fp_novo)
                 res.append(
                     FlexibilizationResult(
                         flexType="FP",
@@ -716,7 +727,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
     def _flexibilizaDEFMIN(
         self, dadger: Dadger, inviabilidades: List[InviabilidadeDEFMIN]
     ) -> List[FlexibilizationResult]:
-        def __identifica_inv(inv: InviabilidadeDEFMIN) -> Tuple[int, int, int]:
+        def __identifica_inv(inv: InviabilidadeDEFMIN) -> Tuple[int, int, str]:
             return (inv._codigo, inv._estagio, inv._patamar)
 
         def __inv_maxima_violacao_identificada(
@@ -735,7 +746,7 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
         res: List[FlexibilizationResult] = []
         # Estrutura para conter os pares (código, estágio, patamar)
         # já flexibilizados
-        flexibilizados: List[Tuple[int, int, int]] = []
+        flexibilizados: List[Tuple[int, int, str]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -765,7 +776,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
             # Flexibiliza
             valor_flex = int(np.ceil(max_viol._violacao))
-            novo_valor = np.max([0, reg_ac.vazao - valor_flex])
+            vazao = reg_ac.vazao
+            assert isinstance(vazao, int)
+            novo_valor = np.max([0, -valor_flex])
             Log.log().info(
                 f"Flexibilizando DEFMIN {max_viol._codigo} -"
                 + f" Estágio {max_viol._estagio}:"
