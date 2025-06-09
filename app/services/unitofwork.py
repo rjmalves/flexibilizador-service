@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from os import chdir, curdir
-from typing import Dict
+from typing import Dict, Type
 from pathlib import Path
 
 from app.adapters.filesrepository import (
@@ -39,7 +39,9 @@ class FSUnitOfWork(AbstractUnitOfWork):
     def __enter__(self) -> "FSUnitOfWork":
         chdir(self._case_directory)
         self.__create_repository()
-        return super().__enter__()
+        uow = super().__enter__()
+        assert isinstance(uow, FSUnitOfWork)
+        return uow
 
     def __exit__(self, *args):
         chdir(self._current_path)
@@ -47,6 +49,7 @@ class FSUnitOfWork(AbstractUnitOfWork):
 
     @property
     def files(self) -> RawFilesRepository:
+        assert isinstance(self._files, RawFilesRepository)
         return self._files
 
     def rollback(self):
@@ -54,7 +57,7 @@ class FSUnitOfWork(AbstractUnitOfWork):
 
 
 def factory(kind: str, *args, **kwargs) -> AbstractUnitOfWork:
-    mappings: Dict[str, AbstractUnitOfWork] = {
+    mappings: Dict[str, Type[AbstractUnitOfWork]] = {
         "FS": FSUnitOfWork,
     }
     return mappings[kind](*args, **kwargs)

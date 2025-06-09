@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends
-from typing import List
 from app.internal.httpresponse import HTTPResponse
 from app.models.flexibilizationrequest import FlexibilizationRequest
 from app.models.flexibilizationresponse import FlexibilizationResponse
@@ -16,19 +15,9 @@ router = APIRouter(
 )
 
 
-responses = {
-    201: {"detail": ""},
-    202: {"detail": ""},
-    404: {"detail": ""},
-    500: {"detail": ""},
-    503: {"detail": ""},
-}
-
-
 @router.post(
     "/",
     response_model=FlexibilizationResponse,
-    responses=responses,
 )
 async def flexibilize(
     req: FlexibilizationRequest,

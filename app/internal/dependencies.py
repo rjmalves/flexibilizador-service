@@ -1,10 +1,11 @@
 from app.internal.settings import Settings
 from fastapi import HTTPException
+from typing import Type
 from app.adapters.uriparserrepository import AbstractURIParsingRepository
 from app.adapters.uriparserrepository import factory as parser_factory
 
 
-async def uriParser() -> AbstractURIParsingRepository:
+async def uriParser() -> Type[AbstractURIParsingRepository]:
     s = parser_factory(Settings.uri_pattern)
     if s is None:
         raise HTTPException(
