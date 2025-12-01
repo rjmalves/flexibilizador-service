@@ -1,11 +1,9 @@
 import logging
-import logging.handlers
 
 from app.utils.singleton import Singleton
 
 
 class Log(metaclass=Singleton):
-
     LOGGER = None
 
     @classmethod

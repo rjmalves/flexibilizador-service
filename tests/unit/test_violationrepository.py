@@ -35,27 +35,31 @@ class TestFlexibilizaRE:
     @pytest.fixture
     def re_inv_linf(self, hidr, relato, available_re_code):
         """Create InviabilidadeRE with L. INF limit using available code."""
-        linha = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. INF)",
-            "violacao": 100.0,
-            "unidade": "MW",
-        })
+        linha = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. INF)",
+                "violacao": 100.0,
+                "unidade": "MW",
+            }
+        )
         return Inviabilidade.factory(linha, hidr, relato)
 
     @pytest.fixture
     def re_inv_lsup(self, hidr, relato, available_re_code):
         """Create InviabilidadeRE with L. SUP limit using available code."""
-        linha = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. SUP)",
-            "violacao": 50.0,
-            "unidade": "MW",
-        })
+        linha = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. SUP)",
+                "violacao": 50.0,
+                "unidade": "MW",
+            }
+        )
         return Inviabilidade.factory(linha, hidr, relato)
 
     def test_flexibiliza_re_returns_results(self, repo, dadger, re_inv_linf):
@@ -100,22 +104,26 @@ class TestFlexibilizaRE:
         self, repo, dadger, hidr, relato, available_re_code
     ):
         """Test multiple RE with same ID are grouped, max violation used."""
-        linha1 = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. INF)",
-            "violacao": 50.0,
-            "unidade": "MW",
-        })
-        linha2 = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 2,
-            "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. INF)",
-            "violacao": 100.0,
-            "unidade": "MW",
-        })
+        linha1 = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. INF)",
+                "violacao": 50.0,
+                "unidade": "MW",
+            }
+        )
+        linha2 = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 2,
+                "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. INF)",
+                "violacao": 100.0,
+                "unidade": "MW",
+            }
+        )
         inv1 = Inviabilidade.factory(linha1, hidr, relato)
         inv2 = Inviabilidade.factory(linha2, hidr, relato)
 
@@ -129,22 +137,26 @@ class TestFlexibilizaRE:
         self, repo, dadger, hidr, relato, available_re_code
     ):
         """Test RE with different patamares create separate results."""
-        linha1 = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. INF)",
-            "violacao": 50.0,
-            "unidade": "MW",
-        })
-        linha2 = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 2 (L. INF)",
-            "violacao": 30.0,
-            "unidade": "MW",
-        })
+        linha1 = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. INF)",
+                "violacao": 50.0,
+                "unidade": "MW",
+            }
+        )
+        linha2 = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 2 (L. INF)",
+                "violacao": 30.0,
+                "unidade": "MW",
+            }
+        )
         inv1 = Inviabilidade.factory(linha1, hidr, relato)
         inv2 = Inviabilidade.factory(linha2, hidr, relato)
 
@@ -162,14 +174,16 @@ class TestFlexibilizaRE:
         self, repo, dadger, hidr, relato, available_re_code
     ):
         """Test delta value (1 for RE) is applied to violation."""
-        linha = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. INF)",
-            "violacao": 10.0,
-            "unidade": "MW",
-        })
+        linha = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RESTRICAO ELETRICA {available_re_code} PATAMAR 1 (L. INF)",
+                "violacao": 10.0,
+                "unidade": "MW",
+            }
+        )
         inv = Inviabilidade.factory(linha, hidr, relato)
 
         results = repo._flexibilizaRE(dadger, [inv])
@@ -204,27 +218,31 @@ class TestFlexibilizaHQ:
     @pytest.fixture
     def hq_inv_linf(self, hidr, relato, available_hq_code):
         """Create InviabilidadeHQ with L. INF limit using available code."""
-        linha = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. INF)",
-            "violacao": 50.0,
-            "unidade": "m3/s",
-        })
+        linha = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. INF)",
+                "violacao": 50.0,
+                "unidade": "m3/s",
+            }
+        )
         return Inviabilidade.factory(linha, hidr, relato)
 
     @pytest.fixture
     def hq_inv_lsup(self, hidr, relato, available_hq_code):
         """Create InviabilidadeHQ with L. SUP limit using available code."""
-        linha = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. SUP)",
-            "violacao": 30.0,
-            "unidade": "m3/s",
-        })
+        linha = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. SUP)",
+                "violacao": 30.0,
+                "unidade": "m3/s",
+            }
+        )
         return Inviabilidade.factory(linha, hidr, relato)
 
     def test_flexibiliza_hq_returns_results(self, repo, dadger, hq_inv_linf):
@@ -264,14 +282,16 @@ class TestFlexibilizaHQ:
         Note: This test may fail for some HQ codes due to missing initial limit values
         in the dadger fixture. In such cases, the test passes if it creates the LQ register.
         """
-        linha = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. SUP)",
-            "violacao": 30.0,
-            "unidade": "m3/s",
-        })
+        linha = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. SUP)",
+                "violacao": 30.0,
+                "unidade": "m3/s",
+            }
+        )
         inv = Inviabilidade.factory(linha, hidr, relato)
 
         try:
@@ -288,22 +308,26 @@ class TestFlexibilizaHQ:
         self, repo, dadger, hidr, relato, available_hq_code
     ):
         """Test multiple HQ with same ID are grouped, max violation used."""
-        linha1 = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. INF)",
-            "violacao": 20.0,
-            "unidade": "m3/s",
-        })
-        linha2 = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 2,
-            "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. INF)",
-            "violacao": 50.0,
-            "unidade": "m3/s",
-        })
+        linha1 = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. INF)",
+                "violacao": 20.0,
+                "unidade": "m3/s",
+            }
+        )
+        linha2 = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 2,
+                "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. INF)",
+                "violacao": 50.0,
+                "unidade": "m3/s",
+            }
+        )
         inv1 = Inviabilidade.factory(linha1, hidr, relato)
         inv2 = Inviabilidade.factory(linha2, hidr, relato)
 
@@ -317,22 +341,26 @@ class TestFlexibilizaHQ:
         self, repo, dadger, hidr, relato, available_hq_code
     ):
         """Test HQ with different patamares create separate results."""
-        linha1 = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. INF)",
-            "violacao": 20.0,
-            "unidade": "m3/s",
-        })
-        linha2 = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RHQ {available_hq_code}: PATAMAR 2 (L. INF)",
-            "violacao": 30.0,
-            "unidade": "m3/s",
-        })
+        linha1 = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. INF)",
+                "violacao": 20.0,
+                "unidade": "m3/s",
+            }
+        )
+        linha2 = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RHQ {available_hq_code}: PATAMAR 2 (L. INF)",
+                "violacao": 30.0,
+                "unidade": "m3/s",
+            }
+        )
         inv1 = Inviabilidade.factory(linha1, hidr, relato)
         inv2 = Inviabilidade.factory(linha2, hidr, relato)
 
@@ -350,14 +378,16 @@ class TestFlexibilizaHQ:
         self, repo, dadger, hidr, relato, available_hq_code
     ):
         """Test delta value (5 for HQ) is applied to violation."""
-        linha = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. INF)",
-            "violacao": 10.0,
-            "unidade": "m3/s",
-        })
+        linha = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RHQ {available_hq_code}: PATAMAR 1 (L. INF)",
+                "violacao": 10.0,
+                "unidade": "m3/s",
+            }
+        )
         inv = Inviabilidade.factory(linha, hidr, relato)
 
         results = repo._flexibilizaHQ(dadger, [inv])
@@ -398,22 +428,26 @@ class TestFlexibilize:
             else hq_regs.codigo_restricao
         )
 
-        linha_re = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RESTRICAO ELETRICA {re_code} PATAMAR 1 (L. INF)",
-            "violacao": 50.0,
-            "unidade": "MW",
-        })
-        linha_hq = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RHQ {hq_code}: PATAMAR 1 (L. INF)",
-            "violacao": 30.0,
-            "unidade": "m3/s",
-        })
+        linha_re = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RESTRICAO ELETRICA {re_code} PATAMAR 1 (L. INF)",
+                "violacao": 50.0,
+                "unidade": "MW",
+            }
+        )
+        linha_hq = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RHQ {hq_code}: PATAMAR 1 (L. INF)",
+                "violacao": 30.0,
+                "unidade": "m3/s",
+            }
+        )
         inv_re = Inviabilidade.factory(linha_re, hidr, relato)
         inv_hq = Inviabilidade.factory(linha_hq, hidr, relato)
 
@@ -440,22 +474,26 @@ class TestFlexibilize:
             else re_regs.codigo_restricao
         )
 
-        linha1 = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RESTRICAO ELETRICA {re_code} PATAMAR 1 (L. INF)",
-            "violacao": 50.0,
-            "unidade": "MW",
-        })
-        linha2 = pd.Series({
-            "iteracao": 1,
-            "estagio": 1,
-            "cenario": 1,
-            "restricao": f"RESTRICAO ELETRICA {re_code} PATAMAR 2 (L. SUP)",
-            "violacao": 30.0,
-            "unidade": "MW",
-        })
+        linha1 = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RESTRICAO ELETRICA {re_code} PATAMAR 1 (L. INF)",
+                "violacao": 50.0,
+                "unidade": "MW",
+            }
+        )
+        linha2 = pd.Series(
+            {
+                "iteracao": 1,
+                "estagio": 1,
+                "cenario": 1,
+                "restricao": f"RESTRICAO ELETRICA {re_code} PATAMAR 2 (L. SUP)",
+                "violacao": 30.0,
+                "unidade": "MW",
+            }
+        )
         inv1 = Inviabilidade.factory(linha1, hidr, relato)
         inv2 = Inviabilidade.factory(linha2, hidr, relato)
 
