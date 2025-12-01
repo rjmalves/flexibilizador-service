@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel
 
 
@@ -10,7 +9,7 @@ class FlexibilizationResult(BaseModel):
     flexType: str | None
     flexStage: int | None
     flexCode: int | None
-    flexPatamar: str | None
+    flexPatamar: int | str | None
     flexLimit: str | None
     flexSubsystem: str | None
     flexAmount: float | None

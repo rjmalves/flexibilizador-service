@@ -10,7 +10,6 @@ class Settings:
     host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", "8000"))
     root_path = os.getenv("ROOT_PATH", "")
-    encoding_script = "app/static/converte_utf8.sh"
     log_level = os.getenv("LOG_LEVEL", "INFO")
     debug = os.getenv("DEBUG", "false").lower() == "true"
 
@@ -32,7 +31,6 @@ class Settings:
         cls.host = os.getenv("HOST", "0.0.0.0")
         cls.port = int(os.getenv("PORT", "8000"))
         cls.root_path = os.getenv("ROOT_PATH", "")
-        cls.encoding_script = "app/static/converte_utf8.sh"
         cls.log_level = os.getenv("LOG_LEVEL", "INFO")
         cls.debug = os.getenv("DEBUG", "false").lower() == "true"
         # S3 Configuration

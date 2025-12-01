@@ -14,6 +14,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 
 from app.internal.exceptions import ArtifactNotFoundError, S3OperationError
+from app.internal.settings import Settings
 
 
 class AbstractS3Repository(ABC):
@@ -283,8 +284,6 @@ def get_s3_repository() -> S3Repository:
     global _s3_repository
 
     if _s3_repository is None:
-        from app.internal.settings import Settings
-
         _s3_repository = S3Repository(
             region=Settings.aws_region,
             endpoint_url=Settings.s3_endpoint_url,

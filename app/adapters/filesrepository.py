@@ -1,4 +1,3 @@
-import pathlib
 from abc import ABC, abstractmethod
 from os.path import join
 
@@ -10,8 +9,6 @@ from idecomp.decomp.inviabunic import InviabUnic
 from idecomp.decomp.relato import Relato
 
 from app.internal.httpresponse import HTTPResponse
-from app.internal.settings import Settings
-from app.utils.encoding import converte_codificacao
 from app.utils.log import Log
 
 
@@ -57,21 +54,15 @@ class RawFilesRepository(AbstractFilesRepository):
         self.__arquivos: Arquivos | HTTPResponse = HTTPResponse(
             code=404, detail=""
         )
-        self.__dadger: Dadger | HTTPResponse = HTTPResponse(
-            code=404, detail=""
-        )
+        self.__dadger: Dadger | HTTPResponse = HTTPResponse(code=404, detail="")
         self.__read_dadger = False
-        self.__relato: Relato | HTTPResponse = HTTPResponse(
-            code=404, detail=""
-        )
+        self.__relato: Relato | HTTPResponse = HTTPResponse(code=404, detail="")
         self.__read_relato = False
         self.__inviabunic: InviabUnic | HTTPResponse = HTTPResponse(
             code=404, detail=""
         )
         self.__read_inviabunic = False
-        self.__hidr: Hidr | HTTPResponse = HTTPResponse(
-            code=404, detail=""
-        )
+        self.__hidr: Hidr | HTTPResponse = HTTPResponse(code=404, detail="")
         self.__read_hidr = False
 
     @property
@@ -101,13 +92,6 @@ class RawFilesRepository(AbstractFilesRepository):
                 arq_dadger = arq.dadger
                 if not arq_dadger:
                     raise FileNotFoundError()
-                caminho = str(pathlib.Path(self.__path).joinpath(arq_dadger))
-                script = str(
-                    pathlib.Path(Settings.installdir).joinpath(
-                        Settings.encoding_script
-                    )
-                )
-                await converte_codificacao(caminho, script)
                 Log.log().info(f"Lendo arquivo {arq_dadger}")
                 self.__dadger = Dadger.read(join(self.__path, arq_dadger))
             except FileNotFoundError:
@@ -159,9 +143,7 @@ class RawFilesRepository(AbstractFilesRepository):
                     join(self.__path, f"inviab_unic.{self.caso.arquivos}")
                 )
             except FileNotFoundError:
-                msg = (
-                    f"Não encontrado arquivo inviab_unic.{self.caso.arquivos}"
-                )
+                msg = f"Não encontrado arquivo inviab_unic.{self.caso.arquivos}"
                 Log.log().info(msg)
                 self.__inviabunic = HTTPResponse(code=404, detail=msg)
             except Exception as e:

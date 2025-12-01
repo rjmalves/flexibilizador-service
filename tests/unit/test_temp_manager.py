@@ -31,11 +31,13 @@ class TestTempDirectory:
         base_dir = str(tmp_path)
         created_path = None
 
-        with pytest.raises(ValueError):
-            with temp_directory(base_dir=base_dir) as temp_dir:
-                created_path = temp_dir
-                assert temp_dir.exists()
-                raise ValueError("Test exception")
+        with (
+            pytest.raises(ValueError),
+            temp_directory(base_dir=base_dir) as temp_dir,
+        ):
+            created_path = temp_dir
+            assert temp_dir.exists()
+            raise ValueError("Test exception")
 
         assert not created_path.exists()
 

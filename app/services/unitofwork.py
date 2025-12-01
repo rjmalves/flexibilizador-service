@@ -197,7 +197,9 @@ class S3UnitOfWork(AbstractUnitOfWork):
         """
         assert self._temp_dir is not None, "temp_dir must be set before calling"
 
-        deck_key = f"artifacts/{self._execution_hash}/entradas/deck_processado.zip"
+        deck_key = (
+            f"artifacts/{self._execution_hash}/entradas/deck_processado.zip"
+        )
 
         # Download the zip first to check caso.dat
         zip_path = self._temp_dir / "deck_processado.zip"
@@ -217,7 +219,9 @@ class S3UnitOfWork(AbstractUnitOfWork):
             Log.log().info(f"File extension from caso.dat: {extension}")
         else:
             extension = "rv0"
-            Log.log().warning("caso.dat not found, using default extension: rv0")
+            Log.log().warning(
+                "caso.dat not found, using default extension: rv0"
+            )
 
         # Move extracted files to temp_dir root
         for item in extract_dir.iterdir():
@@ -237,7 +241,9 @@ class S3UnitOfWork(AbstractUnitOfWork):
         assert self._temp_dir is not None, "temp_dir must be set before calling"
 
         # Download inviab_unic
-        inviab_key = f"artifacts/{self._execution_hash}/saidas/inviab_unic.{extension}"
+        inviab_key = (
+            f"artifacts/{self._execution_hash}/saidas/inviab_unic.{extension}"
+        )
         inviab_path = self._temp_dir / f"inviab_unic.{extension}"
 
         try:
@@ -249,7 +255,9 @@ class S3UnitOfWork(AbstractUnitOfWork):
             Log.log().warning(f"inviab_unic.{extension} not found")
 
         # Download relato
-        relato_key = f"artifacts/{self._execution_hash}/saidas/relato.{extension}"
+        relato_key = (
+            f"artifacts/{self._execution_hash}/saidas/relato.{extension}"
+        )
         relato_path = self._temp_dir / f"relato.{extension}"
 
         try:
