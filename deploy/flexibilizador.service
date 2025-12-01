@@ -1,0 +1,35 @@
+[Unit]
+Description=Flexibilizador Service
+Documentation=https://github.com/your-org/flexibilizador-service
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/flexibilizador-service
+
+# Start/Stop commands
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose down
+ExecReload=/usr/bin/docker compose pull && /usr/bin/docker compose up -d
+
+# Timeouts
+TimeoutStartSec=120
+TimeoutStopSec=60
+
+# Restart on failure
+Restart=on-failure
+RestartSec=10
+
+# Environment
+EnvironmentFile=-/opt/flexibilizador-service/.env
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=flexibilizador
+
+[Install]
+WantedBy=multi-user.target

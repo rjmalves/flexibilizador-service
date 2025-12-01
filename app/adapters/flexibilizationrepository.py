@@ -1,14 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Union, Type, Optional
+
 import pandas as pd  # type: ignore
-from app.internal.httpresponse import HTTPResponse
-from app.models.flexibilizationrule import FlexibilizationRule
-from app.models.flexibilizationresult import FlexibilizationResult
-from app.models.inviabilidade import Inviabilidade
+from idecomp.decomp import Dadger, Hidr, InviabUnic, Relato
+
 from app.adapters.violationrepository import AbsoluteViolationRepository
+from app.internal.httpresponse import HTTPResponse
+from app.models.flexibilizationresult import FlexibilizationResult
+from app.models.flexibilizationrule import FlexibilizationRule
+from app.models.inviabilidade import Inviabilidade
 from app.services.unitofwork import AbstractUnitOfWork
 from app.utils.log import Log
-from idecomp.decomp import Dadger, InviabUnic, Relato, Hidr
 
 
 class AbstractFlexibilizationRepository(ABC):
@@ -17,9 +18,9 @@ class AbstractFlexibilizationRepository(ABC):
     @abstractmethod
     async def flex(
         self,
-        rules: List[FlexibilizationRule],
+        rules: list[FlexibilizationRule],
         uow: AbstractUnitOfWork,
-    ) -> Union[List[FlexibilizationResult], HTTPResponse]:
+    ) -> list[FlexibilizationResult] | HTTPResponse:
         pass
 
 
@@ -28,9 +29,9 @@ class NEWAVEFlexibilizationRepository(AbstractFlexibilizationRepository):
 
     async def flex(
         self,
-        rules: List[FlexibilizationRule],
-        uow: AbstractUnitOfWork,
-    ) -> Union[List[FlexibilizationResult], HTTPResponse]:
+        _rules: list[FlexibilizationRule],
+        _uow: AbstractUnitOfWork,
+    ) -> list[FlexibilizationResult] | HTTPResponse:
         return HTTPResponse(code=500, detail="NEWAVE not supported")
 
 
@@ -39,9 +40,9 @@ class DECOMPFlexibilizationRepository(AbstractFlexibilizationRepository):
 
     async def flex(
         self,
-        rules: List[FlexibilizationRule],
+        _rules: list[FlexibilizationRule],
         uow: AbstractUnitOfWork,
-    ) -> Union[List[FlexibilizationResult], HTTPResponse]:
+    ) -> list[FlexibilizationResult] | HTTPResponse:
         try:
             with uow:
                 dadger = await uow.files.get_dadger()
@@ -55,7 +56,7 @@ class DECOMPFlexibilizationRepository(AbstractFlexibilizationRepository):
                 hidr = uow.files.get_hidr()
                 assert isinstance(hidr, Hidr)
                 # Cria as inviabilidades
-                inviabilidades: List[Inviabilidade] = []
+                inviabilidades: list[Inviabilidade] = []
                 for (
                     _,
                     linha,
@@ -77,7 +78,7 @@ class DECOMPFlexibilizationRepository(AbstractFlexibilizationRepository):
             return HTTPResponse(code=500, detail=str(e))
 
 
-SUPPORTED_PROGRAMS: Dict[str, Type[AbstractFlexibilizationRepository]] = {
+SUPPORTED_PROGRAMS: dict[str, type[AbstractFlexibilizationRepository]] = {
     "NEWAVE": NEWAVEFlexibilizationRepository,
     "DECOMP": DECOMPFlexibilizationRepository,
 }
@@ -85,7 +86,7 @@ DEFAULT = DECOMPFlexibilizationRepository
 
 
 def factory(
-    kind: Optional[str], *args, **kwargs
+    kind: str | None, *args, **kwargs
 ) -> AbstractFlexibilizationRepository:
     if not kind:
         kind = ""

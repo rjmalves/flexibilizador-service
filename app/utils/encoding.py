@@ -1,6 +1,5 @@
 from app.utils.terminal import run_terminal_retry
 
-
 TIMEOUT_DEFAULT = 10.0
 
 

@@ -1,35 +1,37 @@
-from abc import abstractmethod, ABC
-from typing import List, Tuple, Dict, Type
+from abc import ABC, abstractmethod
+
 import numpy as np  # type: ignore
 from idecomp.decomp.dadger import Dadger
 from idecomp.decomp.modelos.dadger import (
-    UH,
-    FC,
-    TI,
+    ACNPOSNW,
     ACVAZMIN,
     ACVERTJU,
-    ACNPOSNW,
+    FC,
     FP,
     HE,
-    HV,
-    LV,
     HQ,
+    HV,
     LQ,
-    RE,
     LU,
+    LV,
+    RE,
+    TI,
+    UH,
 )
 
-from app.models.inviabilidade import Inviabilidade
-from app.models.inviabilidade import InviabilidadeEV
-from app.models.inviabilidade import InviabilidadeTI
-from app.models.inviabilidade import InviabilidadeHV
-from app.models.inviabilidade import InviabilidadeHQ
-from app.models.inviabilidade import InviabilidadeRE
-from app.models.inviabilidade import InviabilidadeHE
-from app.models.inviabilidade import InviabilidadeDEFMIN
-from app.models.inviabilidade import InviabilidadeFP
-from app.models.inviabilidade import InviabilidadeDeficit
 from app.models.flexibilizationresult import FlexibilizationResult
+from app.models.inviabilidade import (
+    Inviabilidade,
+    InviabilidadeDeficit,
+    InviabilidadeDEFMIN,
+    InviabilidadeEV,
+    InviabilidadeFP,
+    InviabilidadeHE,
+    InviabilidadeHQ,
+    InviabilidadeHV,
+    InviabilidadeRE,
+    InviabilidadeTI,
+)
 from app.utils.log import Log
 
 
@@ -48,61 +50,61 @@ class AbstractViolationRepository(ABC):
 
     @abstractmethod
     def _flexibilizaEV(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeEV]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeEV]
+    ) -> list[FlexibilizationResult]:
         pass
 
     @abstractmethod
     def _flexibilizaTI(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeTI]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeTI]
+    ) -> list[FlexibilizationResult]:
         pass
 
     @abstractmethod
     def _flexibilizaHV(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeHV]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeHV]
+    ) -> list[FlexibilizationResult]:
         pass
 
     @abstractmethod
     def _flexibilizaHQ(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeHQ]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeHQ]
+    ) -> list[FlexibilizationResult]:
         pass
 
     @abstractmethod
     def _flexibilizaRE(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeRE]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeRE]
+    ) -> list[FlexibilizationResult]:
         pass
 
     @abstractmethod
     def _flexibilizaHE(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeHE]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeHE]
+    ) -> list[FlexibilizationResult]:
         pass
 
     @abstractmethod
     def _flexibilizaDEFMIN(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeDEFMIN]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeDEFMIN]
+    ) -> list[FlexibilizationResult]:
         pass
 
     @abstractmethod
     def _flexibilizaFP(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeFP]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeFP]
+    ) -> list[FlexibilizationResult]:
         pass
 
     @abstractmethod
     def _flexibiliza_deficit(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeDeficit]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeDeficit]
+    ) -> list[FlexibilizationResult]:
         pass
 
     def flexibilize(
-        self, dadger: Dadger, inviabilidades: List[Inviabilidade]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[Inviabilidade]
+    ) -> list[FlexibilizationResult]:
         # Agrupa as inviabilidades por tipo
         tipos = AbstractViolationRepository.tipos_inviabilidades
         invs_por_tipo: dict = {t: [] for t in tipos}
@@ -141,7 +143,7 @@ class AbstractViolationRepository(ABC):
 
 
 class AbsoluteViolationRepository(AbstractViolationRepository):
-    deltas_inviabilidades: Dict[Type[Inviabilidade], float] = {
+    deltas_inviabilidades: dict[type[Inviabilidade], float] = {
         InviabilidadeEV: 0,
         InviabilidadeTI: 0.2,
         InviabilidadeHV: 1,
@@ -155,13 +157,13 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
     # Override
     def _flexibilizaEV(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeEV]
-    ) -> List[FlexibilizationResult]:
-        def __identifica_inv(inv: InviabilidadeEV) -> Tuple[int, int]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeEV]
+    ) -> list[FlexibilizationResult]:
+        def __identifica_inv(inv: InviabilidadeEV) -> tuple[int, int]:
             return (inv._codigo, inv._estagio)
 
         def __inv_maxima_violacao_identificada(
-            invs: List[InviabilidadeEV], inv_ini: InviabilidadeEV
+            invs: list[InviabilidadeEV], inv_ini: InviabilidadeEV
         ) -> InviabilidadeEV:
             max_viol = inv_ini
             ident_ini = __identifica_inv(inv_ini)
@@ -173,9 +175,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     max_viol = i
             return max_viol
 
-        res: List[FlexibilizationResult] = []
+        res: list[FlexibilizationResult] = []
         # Estrutura para conter os pares (código, estágio) já flexibilizados
-        flexibilizados: List[Tuple[int, int]] = []
+        flexibilizados: list[tuple[int, int]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -209,13 +211,13 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
     # Override
     def _flexibilizaTI(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeTI]
-    ) -> List[FlexibilizationResult]:
-        def __identifica_inv(inv: InviabilidadeTI) -> Tuple[int, int]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeTI]
+    ) -> list[FlexibilizationResult]:
+        def __identifica_inv(inv: InviabilidadeTI) -> tuple[int, int]:
             return (inv._codigo, inv._estagio)
 
         def __inv_maxima_violacao_identificada(
-            invs: List[InviabilidadeTI], inv_ini: InviabilidadeTI
+            invs: list[InviabilidadeTI], inv_ini: InviabilidadeTI
         ) -> InviabilidadeTI:
             max_viol = inv_ini
             ident_ini = __identifica_inv(inv_ini)
@@ -227,9 +229,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     max_viol = i
             return max_viol
 
-        res: List[FlexibilizationResult] = []
+        res: list[FlexibilizationResult] = []
         # Estrutura para conter os pares (código, estágio) já flexibilizados
-        flexibilizados: List[Tuple[int, int]] = []
+        flexibilizados: list[tuple[int, int]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -270,13 +272,13 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
     # Override
     def _flexibilizaHV(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeHV]
-    ) -> List[FlexibilizationResult]:
-        def __identifica_inv(inv: InviabilidadeHV) -> Tuple[int, int, str]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeHV]
+    ) -> list[FlexibilizationResult]:
+        def __identifica_inv(inv: InviabilidadeHV) -> tuple[int, int, str]:
             return (inv._codigo, inv._estagio, inv._limite)
 
         def __inv_maxima_violacao_identificada(
-            invs: List[InviabilidadeHV], inv_ini: InviabilidadeHV
+            invs: list[InviabilidadeHV], inv_ini: InviabilidadeHV
         ) -> InviabilidadeHV:
             max_viol = inv_ini
             ident_ini = __identifica_inv(inv_ini)
@@ -299,10 +301,10 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             for e in range(ei, ef + 1):
                 dadger.lv(codigo_restricao=max_viol._codigo, estagio=e)
 
-        res: List[FlexibilizationResult] = []
+        res: list[FlexibilizationResult] = []
         # Estrutura para conter as tuplas
         # (código, estágio, limite) já flexibilizados
-        flexibilizados: List[Tuple[int, int, str]] = []
+        flexibilizados: list[tuple[int, int, str]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -398,15 +400,15 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
     # Override
     def _flexibilizaHQ(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeHQ]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeHQ]
+    ) -> list[FlexibilizationResult]:
         def __identifica_inv(
             inv: InviabilidadeHQ,
-        ) -> Tuple[int, int, str, str]:
+        ) -> tuple[int, int, str, str]:
             return (inv._codigo, inv._estagio, inv._limite, inv._patamar)
 
         def __inv_maxima_violacao_identificada(
-            invs: List[InviabilidadeHQ], inv_ini: InviabilidadeHQ
+            invs: list[InviabilidadeHQ], inv_ini: InviabilidadeHQ
         ) -> InviabilidadeHQ:
             max_viol = inv_ini
             ident_ini = __identifica_inv(inv_ini)
@@ -429,10 +431,10 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             for e in range(ei, ef + 1):
                 dadger.lq(codigo_restricao=max_viol._codigo, estagio=e)
 
-        res: List[FlexibilizationResult] = []
+        res: list[FlexibilizationResult] = []
         # Estrutura para conter as tuplas
         # (código, estágio, limite, patamar) já flexibilizados
-        flexibilizados: List[Tuple[int, int, str, str]] = []
+        flexibilizados: list[tuple[int, int, str, str]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -512,15 +514,15 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
     # Override
     def _flexibilizaRE(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeRE]
-    ) -> List[FlexibilizationResult]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeRE]
+    ) -> list[FlexibilizationResult]:
         def __identifica_inv(
             inv: InviabilidadeRE,
-        ) -> Tuple[int, int, str, str]:
+        ) -> tuple[int, int, str, str]:
             return (inv._codigo, inv._estagio, inv._limite, inv._patamar)
 
         def __inv_maxima_violacao_identificada(
-            invs: List[InviabilidadeRE], inv_ini: InviabilidadeRE
+            invs: list[InviabilidadeRE], inv_ini: InviabilidadeRE
         ) -> InviabilidadeRE:
             max_viol = inv_ini
             ident_ini = __identifica_inv(inv_ini)
@@ -543,10 +545,10 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             for e in range(ei, ef + 1):
                 dadger.lu(codigo_restricao=max_viol._codigo, estagio=e)
 
-        res: List[FlexibilizationResult] = []
+        res: list[FlexibilizationResult] = []
         # Estrutura para conter as tuplas
         # (código, estágio, limite, patamar) já flexibilizados
-        flexibilizados: List[Tuple[int, int, str, str]] = []
+        flexibilizados: list[tuple[int, int, str, str]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -631,13 +633,13 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
     # Override
     def _flexibilizaFP(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeFP]
-    ) -> List[FlexibilizationResult]:
-        def __identifica_inv(inv: InviabilidadeFP) -> Tuple[int, int]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeFP]
+    ) -> list[FlexibilizationResult]:
+        def __identifica_inv(inv: InviabilidadeFP) -> tuple[int, int]:
             return (inv._codigo, inv._estagio)
 
         def __inv_maxima_violacao_identificada(
-            invs: List[InviabilidadeFP], inv_ini: InviabilidadeFP
+            invs: list[InviabilidadeFP], inv_ini: InviabilidadeFP
         ) -> InviabilidadeFP:
             max_viol = inv_ini
             ident_ini = __identifica_inv(inv_ini)
@@ -649,9 +651,9 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     max_viol = i
             return max_viol
 
-        res: List[FlexibilizationResult] = []
+        res: list[FlexibilizationResult] = []
         # Estrutura para conter os pares (código, estágio) já flexibilizados
-        flexibilizados: List[Tuple[int, int]] = []
+        flexibilizados: list[tuple[int, int]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -725,13 +727,13 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
     # Override
     def _flexibilizaDEFMIN(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeDEFMIN]
-    ) -> List[FlexibilizationResult]:
-        def __identifica_inv(inv: InviabilidadeDEFMIN) -> Tuple[int, int, str]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeDEFMIN]
+    ) -> list[FlexibilizationResult]:
+        def __identifica_inv(inv: InviabilidadeDEFMIN) -> tuple[int, int, str]:
             return (inv._codigo, inv._estagio, inv._patamar)
 
         def __inv_maxima_violacao_identificada(
-            invs: List[InviabilidadeDEFMIN], inv_ini: InviabilidadeDEFMIN
+            invs: list[InviabilidadeDEFMIN], inv_ini: InviabilidadeDEFMIN
         ) -> InviabilidadeDEFMIN:
             max_viol = inv_ini
             ident_ini = __identifica_inv(inv_ini)
@@ -743,10 +745,10 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     max_viol = i
             return max_viol
 
-        res: List[FlexibilizationResult] = []
+        res: list[FlexibilizationResult] = []
         # Estrutura para conter os pares (código, estágio, patamar)
         # já flexibilizados
-        flexibilizados: List[Tuple[int, int, str]] = []
+        flexibilizados: list[tuple[int, int, str]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -800,13 +802,13 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
     # Override
     def _flexibilizaHE(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeHE]
-    ) -> List[FlexibilizationResult]:
-        def __identifica_inv(inv: InviabilidadeHE) -> Tuple[int, int, str]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeHE]
+    ) -> list[FlexibilizationResult]:
+        def __identifica_inv(inv: InviabilidadeHE) -> tuple[int, int, str]:
             return (inv._codigo, inv._estagio, inv._limite)
 
         def __inv_maxima_violacao_identificada(
-            invs: List[InviabilidadeHE], inv_ini: InviabilidadeHE
+            invs: list[InviabilidadeHE], inv_ini: InviabilidadeHE
         ) -> InviabilidadeHE:
             max_viol = inv_ini
             ident_ini = __identifica_inv(inv_ini)
@@ -818,10 +820,10 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
                     max_viol = i
             return max_viol
 
-        res: List[FlexibilizationResult] = []
+        res: list[FlexibilizationResult] = []
         # Estrutura para conter as tuplas
         # (código, estágio, limite) já flexibilizados
-        flexibilizados: List[Tuple[int, int, str]] = []
+        flexibilizados: list[tuple[int, int, str]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora
@@ -870,13 +872,13 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
 
     # Override
     def _flexibiliza_deficit(
-        self, dadger: Dadger, inviabilidades: List[InviabilidadeDeficit]
-    ) -> List[FlexibilizationResult]:
-        def __identifica_inv(inv: InviabilidadeDeficit) -> Tuple[int, str]:
+        self, dadger: Dadger, inviabilidades: list[InviabilidadeDeficit]
+    ) -> list[FlexibilizationResult]:
+        def __identifica_inv(inv: InviabilidadeDeficit) -> tuple[int, str]:
             return (inv._estagio, inv._subsistema)
 
         def __inv_maxima_violacao_identificada(
-            invs: List[InviabilidadeDeficit], inv_ini: InviabilidadeDeficit
+            invs: list[InviabilidadeDeficit], inv_ini: InviabilidadeDeficit
         ) -> InviabilidadeDeficit:
             max_viol = inv_ini
             ident_ini = __identifica_inv(inv_ini)
@@ -895,10 +897,10 @@ class AbsoluteViolationRepository(AbstractViolationRepository):
             "N": [4, 8, 9],
         }
 
-        res: List[FlexibilizationResult] = []
+        res: list[FlexibilizationResult] = []
         # Estrutura para conter as tuplas
         # (estagio, subsis) já flexibilizados
-        flexibilizados: List[Tuple[int, str]] = []
+        flexibilizados: list[tuple[int, str]] = []
         for inv in inviabilidades:
             identificacao = __identifica_inv(inv)
             # Se já flexibilizou essa restrição nesse estágio, ignora

@@ -1,19 +1,18 @@
-from abc import ABC, abstractmethod
-from typing import Dict, Type, Union
 import pathlib
+from abc import ABC, abstractmethod
 from os.path import join
 
-from idecomp.decomp.caso import Caso
 from idecomp.decomp.arquivos import Arquivos
+from idecomp.decomp.caso import Caso
 from idecomp.decomp.dadger import Dadger
+from idecomp.decomp.hidr import Hidr
 from idecomp.decomp.inviabunic import InviabUnic
 from idecomp.decomp.relato import Relato
-from idecomp.decomp.hidr import Hidr
 
+from app.internal.httpresponse import HTTPResponse
 from app.internal.settings import Settings
 from app.utils.encoding import converte_codificacao
 from app.utils.log import Log
-from app.internal.httpresponse import HTTPResponse
 
 
 class AbstractFilesRepository(ABC):
@@ -24,11 +23,11 @@ class AbstractFilesRepository(ABC):
 
     @property
     @abstractmethod
-    def arquivos(self) -> Union[Arquivos, HTTPResponse]:
+    def arquivos(self) -> Arquivos | HTTPResponse:
         raise NotImplementedError
 
     @abstractmethod
-    async def get_dadger(self) -> Union[Dadger, HTTPResponse]:
+    async def get_dadger(self) -> Dadger | HTTPResponse:
         raise NotImplementedError
 
     @abstractmethod
@@ -36,15 +35,15 @@ class AbstractFilesRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_inviabunic(self) -> Union[InviabUnic, HTTPResponse]:
+    def get_inviabunic(self) -> InviabUnic | HTTPResponse:
         raise NotImplementedError
 
     @abstractmethod
-    def get_relato(self) -> Union[Relato, HTTPResponse]:
+    def get_relato(self) -> Relato | HTTPResponse:
         raise NotImplementedError
 
     @abstractmethod
-    def get_hidr(self) -> Union[Hidr, HTTPResponse]:
+    def get_hidr(self) -> Hidr | HTTPResponse:
         raise NotImplementedError
 
 
@@ -55,22 +54,22 @@ class RawFilesRepository(AbstractFilesRepository):
             self.__caso = Caso.read(join(str(self.__path), "caso.dat"))
         except FileNotFoundError:
             Log.log().error("Não foi encontrado o arquivo caso.dat")
-        self.__arquivos: Union[Arquivos, HTTPResponse] = HTTPResponse(
+        self.__arquivos: Arquivos | HTTPResponse = HTTPResponse(
             code=404, detail=""
         )
-        self.__dadger: Union[Dadger, HTTPResponse] = HTTPResponse(
+        self.__dadger: Dadger | HTTPResponse = HTTPResponse(
             code=404, detail=""
         )
         self.__read_dadger = False
-        self.__relato: Union[Relato, HTTPResponse] = HTTPResponse(
+        self.__relato: Relato | HTTPResponse = HTTPResponse(
             code=404, detail=""
         )
         self.__read_relato = False
-        self.__inviabunic: Union[InviabUnic, HTTPResponse] = HTTPResponse(
+        self.__inviabunic: InviabUnic | HTTPResponse = HTTPResponse(
             code=404, detail=""
         )
         self.__read_inviabunic = False
-        self.__hidr: Union[Hidr, HTTPResponse] = HTTPResponse(
+        self.__hidr: Hidr | HTTPResponse = HTTPResponse(
             code=404, detail=""
         )
         self.__read_hidr = False
@@ -80,7 +79,7 @@ class RawFilesRepository(AbstractFilesRepository):
         return self.__caso
 
     @property
-    def arquivos(self) -> Union[Arquivos, HTTPResponse]:
+    def arquivos(self) -> Arquivos | HTTPResponse:
         if isinstance(self.__arquivos, HTTPResponse):
             try:
                 self.__arquivos = Arquivos.read(
@@ -92,7 +91,7 @@ class RawFilesRepository(AbstractFilesRepository):
                 self.__arquivos = HTTPResponse(code=404, detail=msg)
         return self.__arquivos
 
-    async def get_dadger(self) -> Union[Dadger, HTTPResponse]:
+    async def get_dadger(self) -> Dadger | HTTPResponse:
         if self.__read_dadger is False:
             self.__read_dadger = True
             try:
@@ -132,7 +131,7 @@ class RawFilesRepository(AbstractFilesRepository):
         except Exception as e:
             return HTTPResponse(code=500, detail=str(e))
 
-    def get_relato(self) -> Union[Relato, HTTPResponse]:
+    def get_relato(self) -> Relato | HTTPResponse:
         if self.__read_relato is False:
             self.__read_relato = True
             try:
@@ -149,7 +148,7 @@ class RawFilesRepository(AbstractFilesRepository):
                 return HTTPResponse(code=500, detail=str(e))
         return self.__relato
 
-    def get_inviabunic(self) -> Union[InviabUnic, HTTPResponse]:
+    def get_inviabunic(self) -> InviabUnic | HTTPResponse:
         if self.__read_inviabunic is False:
             self.__read_inviabunic = True
             try:
@@ -173,7 +172,7 @@ class RawFilesRepository(AbstractFilesRepository):
                 self.__inviabunic = HTTPResponse(code=404, detail=msg)
         return self.__inviabunic
 
-    def get_hidr(self) -> Union[Hidr, HTTPResponse]:
+    def get_hidr(self) -> Hidr | HTTPResponse:
         if self.__read_hidr is False:
             self.__read_hidr = True
             try:
@@ -195,7 +194,7 @@ class RawFilesRepository(AbstractFilesRepository):
 
 
 def factory(kind: str, *args, **kwargs) -> AbstractFilesRepository:
-    mapping: Dict[str, Type[AbstractFilesRepository]] = {
+    mapping: dict[str, type[AbstractFilesRepository]] = {
         "FS": RawFilesRepository
     }
     return mapping.get(kind, RawFilesRepository)(*args, **kwargs)

@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  flexibilizador:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: flexibilizador-service:2.0.0
+    container_name: flexibilizador-service
+    restart: unless-stopped
+    
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - ROOT_PATH=/api/v1/flex
+      - LOG_LEVEL=INFO
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - DEFAULT_BUCKET=${DEFAULT_BUCKET:-decomp-bucket}
+      - TEMP_DIR=/tmp/flexibilizador
+      - ZIP_COMPRESSION_LEVEL=6
+    
+    ports:
+      - "8000:8000"
+    
+    volumes:
+      - /tmp/flexibilizador:/tmp/flexibilizador
+    
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    labels:
+      # Traefik labels for reverse proxy
+      - "traefik.enable=true"
+      - "traefik.http.routers.flexibilizador.rule=PathPrefix(`/api/v1/flex`)"
+      - "traefik.http.routers.flexibilizador.entrypoints=web"
+      - "traefik.http.services.flexibilizador.loadbalancer.server.port=8000"
+      - "traefik.http.routers.flexibilizador.middlewares=strip-prefix"
+      - "traefik.http.middlewares.strip-prefix.stripprefix.prefixes=/api/v1/flex"
+    
+    networks:
+      - hpc-network
+
+networks:
+  hpc-network:
+    external: true
+    name: hpc-network
