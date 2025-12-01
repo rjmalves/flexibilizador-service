@@ -13,7 +13,6 @@ services:
       - HOST=0.0.0.0
       - PORT=8000
       - ROOT_PATH=/api/v1/flex
-      - LOG_LEVEL=INFO
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - DEFAULT_BUCKET=${DEFAULT_BUCKET:-decomp-bucket}
       - TEMP_DIR=/tmp/flexibilizador

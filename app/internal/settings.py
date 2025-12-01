@@ -4,13 +4,9 @@ import os
 class Settings:
     # ===== Application Settings =====
     app_version: str = "2.0.0"
-    clusterId = os.getenv("CLUSTER_ID", "0")
-    basedir = os.getenv("APP_BASEDIR", "/usr/local/bin")
-    installdir = os.getenv("APP_INSTALLDIR", "/usr/local/bin")
     host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", "8000"))
     root_path = os.getenv("ROOT_PATH", "")
-    log_level = os.getenv("LOG_LEVEL", "INFO")
     debug = os.getenv("DEBUG", "false").lower() == "true"
 
     # ===== S3 Configuration =====
@@ -25,13 +21,9 @@ class Settings:
 
     @classmethod
     def read_environments(cls):
-        cls.clusterId = os.getenv("CLUSTER_ID", "0")
-        cls.basedir = os.getenv("APP_BASEDIR", "/usr/local/bin")
-        cls.installdir = os.getenv("APP_INSTALLDIR", "/usr/local/bin")
         cls.host = os.getenv("HOST", "0.0.0.0")
         cls.port = int(os.getenv("PORT", "8000"))
         cls.root_path = os.getenv("ROOT_PATH", "")
-        cls.log_level = os.getenv("LOG_LEVEL", "INFO")
         cls.debug = os.getenv("DEBUG", "false").lower() == "true"
         # S3 Configuration
         cls.aws_region = os.getenv("AWS_REGION", "us-east-1")
