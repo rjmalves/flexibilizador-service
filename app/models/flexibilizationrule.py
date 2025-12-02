@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Optional
 
 
 class FlexibilizationRule(BaseModel):
@@ -7,10 +6,10 @@ class FlexibilizationRule(BaseModel):
     Class for defining a flexibilization rule for a given program.
     """
 
-    violationType: Optional[str]
-    violationCode: Optional[int]
-    violationAmount: Optional[float]
-    violationUnit: Optional[str]
-    constraintType: Optional[str]
-    constraintCode: Optional[str]
-    flexibilizationFactor: Optional[str]
+    violationType: str | None
+    violationCode: int | None
+    violationAmount: float | None
+    violationUnit: str | None
+    constraintType: str | None
+    constraintCode: str | None
+    flexibilizationFactor: str | None

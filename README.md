@@ -1,194 +1,247 @@
-# flexibilizador-service
-Serviço para realização de flexibilização em casos de NEWAVE / DECOMP / DESSEM mediante o aparecimento de inviabilidades. Este serviço é fornecido por meio de uma API REST contendo uma única rota, que recebe os argumentos necessários para realizar a flexibilização de restrições para atendimento a inviabilidades que surgiram em execuções anteriores.
+# Flexibilizador Service
 
-Atualmente é esperado que este serviço seja lançado no próprio cluster, com acesso ao sistema de arquivos onde os casos que serão processados se encontram. Além disso, cada programa pode demandar diferentes arquivos de entrada para a realização da flexibilização, que devem estar disponíveis no diretório do caso especificado, para que seja feita a leitura por parte do serviço.
+REST API for applying flexibilizations to DECOMP executions with infeasibilities.
 
-## Instalação
+## Overview
 
-Para realizar a instalação a partir do repositório, é recomendado criar um ambiente virtual e realizar a instalação das dependências dentro do mesmo.
+The Flexibilizador Service is a microservice that automatically relaxes constraint limits in DECOMP optimization models when infeasibilities are detected. It reads DECOMP artifacts from S3, applies flexibilization rules based on the detected violations, and uploads the modified deck back to S3.
 
-```
-$ git clone https://github.com/rjmalves/flexibilizador-service
-$ cd flexibilizador-service
-$ python3 -m venv ./venv
-$ source ./venv/bin/activate
-$ pip install -r requirements.txt
-```
+## Features
 
-## Configuração
+- **S3 Integration**: Reads DECOMP artifacts from S3 and uploads flexibilized results
+- **Async Processing**: Uses boto3 with async wrappers for efficient I/O
+- **Health Checks**: Kubernetes/Docker compatible health endpoints
+- **Docker Deployment**: Production-ready container with multi-stage build
+- **Traefik Integration**: Built-in labels for reverse proxy routing
+- **Systemd Service**: Auto-start on boot with proper lifecycle management
 
-A configuração do serviço pode ser feita através de um arquivo de variáveis de ambiente `.env`, existente no próprio diretório de instalação. O conteúdo deste arquivo:
+## Quick Start
 
-```
-CLUSTER_ID=1
-HOST="0.0.0.0"
-PORT=5052
-ROOT_PATH="/api/v1/rules"
-```
+### Prerequisites
 
-Cada deploy do `flexibilizador-service` deve ter um atributo `CLUSTER_ID` único, para que outros serviços possam controlar atividades em clusters distintos. 
+- Python 3.12+
+- AWS credentials configured (or LocalStack for development)
+- Docker and Docker Compose (for deployment)
 
-Atualmente as opções suportadas são:
+### Installation (Development)
 
-|       Campo       |   Valores aceitos   |
-| ----------------- | ------------------- |
-| CLUSTER_ID        | `int`               |
-| HOST              | `str`               |
-| PORT              | `int`               |
-| ROOT_PATH         | `str` (URL prefix)  |
+```bash
+git clone https://github.com/your-org/flexibilizador-service
+cd flexibilizador-service
 
+# Using uv (recommended)
+uv venv
+source .venv/bin/activate
+uv pip install -e ".[dev]"
 
-## Uso
-
-Para executar o programa, basta interpretar o arquivo `main.py`:
-
-```
-$ source ./venv/bin/activate
-$ python main.py
+# Or using pip
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
 ```
 
-No terminal é impresso um log de acompanhamento:
+### Installation (Production)
 
-```
-INFO:     Started server process [2133]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:5052 (Press CTRL+C to quit)
-INFO:     127.0.0.1:36872 - "GET /docs HTTP/1.1" 200 OK
-INFO:     127.0.0.1:36872 - "GET /openapi.json HTTP/1.1" 200 OK
+```bash
+cd deploy
+sudo ./install.sh
 ```
 
-Maiores detalhes sobre a rota disponível pode ser visto ao lançar a aplicação localmente e acessar a rota `/docs`, que possui uma página no formato [OpenAPI](https://swagger.io/specification/). Em geral, casos são referenciados por meio do seus caminhos no sistema de arquivos codificados em `base62`.
+### Configuration
 
+Create a `.env` file from the example:
 
-## Definição de Regra de Flexibilização
-
-Cada restrição de cada modelo possui um tratamento padrão para flexibilização com base nas violações da mesma restrição. Todavia, este comportamento pode ser alterado para casos específicos através do fornecimento de regras específicas de flexibilização, modeladas pelo objeto `FlexibilizationRule`:
-
-```json
-    {
-      "violationType": "string",
-      "violationCode": 0,
-      "violationAmount": 0.0,
-      "violationUnit": "string",
-      "constraintType": "string",
-      "constraintCode": "string",
-      "flexibilizationFactor": "string"
-    }
+```bash
+cp .env.example .env
 ```
 
-TODO
+| Variable                | Description                           | Default               |
+| ----------------------- | ------------------------------------- | --------------------- |
+| `HOST`                  | Bind address                          | `0.0.0.0`             |
+| `PORT`                  | Listen port                           | `8000`                |
+| `ROOT_PATH`             | URL prefix for reverse proxy          | `/api/v1/flex`        |
+| `LOG_LEVEL`             | Logging level                         | `INFO`                |
+| `AWS_REGION`            | AWS region for S3                     | `us-east-1`           |
+| `S3_ENDPOINT_URL`       | Custom S3 endpoint (MinIO/LocalStack) | (empty)               |
+| `DEFAULT_BUCKET`        | Default S3 bucket                     | `decomp-bucket`       |
+| `TEMP_DIR`              | Temporary file directory              | `/tmp/flexibilizador` |
+| `ZIP_COMPRESSION_LEVEL` | Compression level (0-9)               | `6`                   |
 
-## Definição de Resultado de Flexibilização
+## API Reference
 
-As respostas das flexibilizações se baseiam no objeto `FlexibilizationResult`. Dependendo da restrição que foi flexibilizada, alguns campos podem não possuir valores, pois o objeto foi definido de modo a cobrir todas as possíveis flexibilizações:
+### POST /flex/
 
-```json
-    {
-      "flexType": "string",
-      "flexStage": 0,
-      "flexCode": 0,
-      "flexPatamar": "string",
-      "flexLimit": "string",
-      "flexSubsystem": "string",
-      "flexAmount": 0
-    }
-```
+Apply flexibilization to a DECOMP execution.
 
-O resultado possui as propriedades:
-
-- `flexType`: tipo de restrição flexibilizada
-- `flexStage`: estágio da restrição flexibilizada
-- `flexCode`: código identificador da restrição flexibilizada
-- `flexPatamar`: patamar da restrição flexibilizada (quando houver)
-- `flexLimit`: limite (superior ou inferior) da restrição flexibilizada (quando houver)
-- `flexSubsystem`: subsistema da restrição flexibilizada (quando houver)
-- `flexAmount`: montante da restrição que foi flexibilizado
-
-Objetos válidos para a flexibilização de algumas restrições são, para o modelo DECOMP:
-
-1. Restrição de evaporação para uma usina
-
-```json
-    {
-      "flexType": "EV",
-      "flexStage": 1,
-      "flexCode": 91,
-      "flexPatamar": null,
-      "flexLimit": null,
-      "flexSubsystem": null,
-      "flexAmount": null
-    }
-```
-
-2. Restrição de taxa de irrigação (registro TI)
-
-```json
-    {
-      "flexType": "TI",
-      "flexStage": 1,
-      "flexCode": 57,
-      "flexPatamar": null,
-      "flexLimit": null,
-      "flexSubsystem": null,
-      "flexAmount": 1.7
-    }
-```
-
-3. Restrição de vazão (registro HQ)
-
-```json
-    {
-      "flexType": "HQ",
-      "flexStage": 1,
-      "flexCode": 191,
-      "flexPatamar": "1",
-      "flexLimit": "L. INF",
-      "flexSubsystem": null,
-      "flexAmount": 7.66763865
-    }
-```
-
-4. Restrição de energia armazenada (registro HE)
-
-```json
-    {
-      "flexType": "HE",
-      "flexStage": 1,
-      "flexCode": 2,
-      "flexPatamar": null,
-      "flexLimit": "L. INF",
-      "flexSubsystem": null,
-      "flexAmount": 3.6359194500000003
-    }
-```
-
-## Rota Fornecida pelo Serviço
-
-A única rota fornecida pelo serviço é `POST /flex`, onde o corpo do objeto `JSON` contém o seguinte formato:
+**Request:**
 
 ```json
 {
-    "id": "IgMI7zzpD0irzRysgz7ia2z2KbKEIQEpZ2GpEhUvJGvNxpMlD65iC9oeOQ4",
-    "program": "DECOMP",
-    "rules": [
-        {
-            "flexType": "string",
-            "flexStage": 0,
-            "flexCode": 0,
-            "flexPatamar": "string",
-            "flexLimit": "string",
-            "flexSubsystem": "string",
-            "flexAmount": 0
-        }
-    ]
+  "bucket": "decomp-bucket",
+  "execution_hash": "abc123def456",
+  "program": "DECOMP",
+  "output_prefix": "ingest"
 }
 ```
 
-Os campos informados são:
+**Response (Success):**
 
-- `id`: o caminho para o diretório do caso codificado em `base62` 
-- `program`:  nome do programa. Atualmente somente casos de `DECOMP` são suportados para flexibilização.  
-- `rules`: lista (opcional) de objetos `FlexibilizaçãoRule`, descritos em uma seção anterior.
+```json
+{
+  "success": true,
+  "execution_hash": "abc123def456",
+  "output_key": "ingest/abc123def456_flexibilizado.zip",
+  "flexibilizations": [
+    {
+      "flexType": "RE",
+      "flexStage": 1,
+      "flexCode": 45,
+      "flexPatamar": "MED",
+      "flexLimit": "FOLGAINF",
+      "flexSubsystem": "SE",
+      "flexAmount": 100.0
+    }
+  ],
+  "message": "Applied 1 flexibilizations"
+}
+```
 
-A resposta, caso a flexibilização seja realizada com sucesso, contém um objeto com uma lista de `FlexibilizationResult`.
+**Error Response:**
+
+```json
+{
+  "error_code": "ARTIFACT_NOT_FOUND",
+  "message": "Could not find execution artifacts",
+  "details": {
+    "bucket": "decomp-bucket",
+    "key": "artifacts/abc123/entradas/deck_processado.zip"
+  }
+}
+```
+
+### Health Endpoints
+
+| Endpoint            | Description                     | Use Case                   |
+| ------------------- | ------------------------------- | -------------------------- |
+| `GET /health`       | Full health status with version | Monitoring                 |
+| `GET /health/live`  | Simple liveness check           | Kubernetes liveness probe  |
+| `GET /health/ready` | Readiness check                 | Kubernetes readiness probe |
+
+## S3 Bucket Structure
+
+The service expects the following S3 structure:
+
+```
+s3://bucket/
+├── artifacts/
+│   └── <execution_hash>/
+│       ├── entradas/
+│       │   └── deck_processado.zip    # Input (downloaded)
+│       └── saidas/
+│           ├── inviab_unic.<ext>      # Downloaded
+│           └── relato.<ext>           # Downloaded
+│
+└── ingest/
+    └── <execution_hash>_flexibilizado.zip   # Output (uploaded)
+```
+
+## Deployment
+
+### Docker
+
+```bash
+# Build image
+docker build -t flexibilizador-service:latest .
+
+# Run container
+docker run -p 8000:8000 \
+  -e AWS_REGION=us-east-1 \
+  -e DEFAULT_BUCKET=decomp-bucket \
+  flexibilizador-service:latest
+```
+
+### Docker Compose
+
+```bash
+# Start with Docker Compose
+docker compose up -d
+
+# View logs
+docker compose logs -f
+```
+
+### Systemd Service
+
+```bash
+# Install service
+cd deploy
+sudo ./install.sh
+
+# Manage service
+sudo systemctl status flexibilizador
+sudo systemctl restart flexibilizador
+sudo journalctl -u flexibilizador -f
+```
+
+## Development
+
+### Running Tests
+
+```bash
+# Install dev dependencies
+uv pip install -e ".[dev]"
+
+# Run tests
+pytest tests/ -v
+```
+
+### With Coverage
+
+```bash
+pytest tests/ --cov=app --cov-report=html
+```
+
+### Development Server
+
+```bash
+python main.py
+# or with auto-reload
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Using LocalStack
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+```
+
+## Migration from v1.x
+
+See [MIGRATION.md](docs/MIGRATION.md) for upgrading from the filesystem-based v1.x to S3-based v2.0.
+
+### Key Changes
+
+| v1.x                         | v2.x                                             |
+| ---------------------------- | ------------------------------------------------ |
+| Filesystem paths             | S3 bucket + execution_hash                       |
+| Base62 encoded paths         | Direct S3 keys                                   |
+| PM2 managed                  | Docker + systemd                                 |
+| `POST /flex` with `id` field | `POST /flex/` with `bucket` and `execution_hash` |
+
+## Flexibilization Results
+
+Each flexibilization result contains:
+
+| Field           | Description                                |
+| --------------- | ------------------------------------------ |
+| `flexType`      | Constraint type (RE, EV, TI, HQ, HE, etc.) |
+| `flexStage`     | Stage number                               |
+| `flexCode`      | Constraint identifier code                 |
+| `flexPatamar`   | Load level (when applicable)               |
+| `flexLimit`     | Limit type (L. INF, L. SUP)                |
+| `flexSubsystem` | Subsystem (SE, S, NE, N)                   |
+| `flexAmount`    | Amount of flexibilization applied          |
+
+## License
+
+See [LICENSE](LICENSE) file.
